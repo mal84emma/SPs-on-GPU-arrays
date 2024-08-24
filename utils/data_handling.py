@@ -1,13 +1,42 @@
-"""Helper functions for loading and saving scenarios."""
+"""Helper functions for handling scenario data."""
 
+import os
 import csv
 import ast
 import numpy as np
+import pandas as pd
 
 
-def format_scenario_tuple(building_tuple):
-    """Format first two arugments of building scenario tuples to be integers."""
-    return tuple([int(t) if i < 2 else t for i,t in enumerate(building_tuple)])
+class ScenarioData:
+    """Class for handling scenario data."""
+    def __init__(self, ts_dict, cost_dict, storage_dict):
+
+        self.load_level = ts_dict['load_level']
+        self.wind_year = ts_dict['wind_year']
+        self.solar_year = ts_dict['solar_year']
+        self.price_year = ts_dict['price_year']
+        self.carbon_year = ts_dict['carbon_year']
+
+        self.wind_cost = cost_dict['wind'] # €/kWp
+        self.wind_lifetime = cost_dict['wind_lifetime'] # years
+        self.solar_cost = cost_dict['solar'] # €/kWp
+        self.solar_lifetime = cost_dict['solar_lifetime']
+
+        self.storage_technologies = sorted(list(storage_dict.keys()))
+        self.storage_costs = [storage_dict[tech]['cost'] for tech in self.storage_technologies]
+        self.storage_lifetime = [storage_dict[tech]['lifetime'] for tech in self.storage_technologies]
+        self.storage_efficiencies = [storage_dict[tech]['efficiency'] for tech in self.storage_technologies]
+
+    def load_timeseries(self, dataset_dir):
+        """Load timeseries data from CSV files."""
+
+        self.load = np.ones(8760) * self.load_level
+        self.norm_wind_gen = pd.read_csv(os.path.join(dataset_dir,'wind',f'{self.wind_year}.csv'))['Wind generation [kW/kWp]'].to_numpy()
+        self.norm_solar_gen = pd.read_csv(os.path.join(dataset_dir,'solar',f'{self.solar_year}.csv'))['Solar generation [kW/kWp]'].to_numpy()
+        self.elec_prices = pd.read_csv(os.path.join(dataset_dir,'price',f'{self.price_year}.csv'))['Electricity price [EUR/kWh]'].to_numpy()
+        self.carbon_intensity = pd.read_csv(os.path.join(dataset_dir,'carbon',f'{self.carbon_year}.csv'))['Carbon intensity [kgCO2/kWh]'].to_numpy()
+
+
 
 def save_scenarios(scenarios, measurements, out_path):
     """Save sampled scenarios to CSV."""
@@ -97,49 +126,5 @@ def load_design_results(in_path):
     # Load reduced scenarios.
     results['reduced_scenarios'] = np.array([[ast.literal_eval(t) for t in row[2:]] for row in rows[16:]])
     results['reduced_probs'] = np.array([float(row[1]) for row in rows[16:]])
-
-    return results
-
-def save_eval_results(results, design, scenarios, out_path):
-    """Save evaluation results for multiple scenarios to CSV."""
-
-    design_header = ['Parameter', 'Units']
-    design_header.extend([f'SB{i}' for i in range(scenarios.shape[1])])
-    design_rows = [
-        ['Battery Capacity', 'kWh', *design['battery_capacities'].flatten()],
-        ['Solar Capacity', 'kWp', *design['solar_capacities'].flatten()],
-        ['Grid Con. Capacity', 'kW', design['grid_con_capacity']]
-    ]
-
-    evals_header = ['Scenario no.','Total cost','Elec. price','Carbon cost','Grid excess cost','Grid capacity cost','Battery cost','Solar cost']
-    evals_header.extend([f'SB{i}' for i in range(scenarios.shape[1])])
-
-    with open(out_path, 'w') as csvfile:
-        writer = csv.writer(csvfile)
-
-        writer.writerow(['Design'])
-        writer.writerow(design_header)
-        for row in design_rows:
-            writer.writerow(row)
-
-        writer.writerow(['Evaluations'])
-        writer.writerow(evals_header)
-        for i, (result,scenario) in enumerate(zip(results,scenarios)):
-            writer.writerow([i,result['objective'],*result['objective_contrs'],*[format_scenario_tuple(tuple(bs)) for bs in scenario]])
-
-def load_eval_results(in_path):
-    """Load evaluation results for multiple scenarios from CSV."""
-
-    results = []
-    with open(in_path, 'r') as csvfile:
-        reader = csv.reader(csvfile)
-        eval_rows = [row for row in reader][7:]
-
-    for row in eval_rows:
-        result = {
-            'objective': float(row[1]),
-            'objective_contrs': [float(t) for t in row[2:8]]
-        }
-        results.append(result)
 
     return results
