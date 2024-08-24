@@ -1,0 +1,26 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# IDE configurations
+.idea
+.vscode
+
+# Mac OS files
+*.DS_STORE
+
+# Temporary files
+temp.html
+
+## Ignore complied files from Stan
+# Ignore all files in stan_models dir
+stan_models/*
+# Unignore stan files in stan_models dir
+!stan_models/*.stan
