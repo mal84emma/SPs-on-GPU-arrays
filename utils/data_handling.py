@@ -11,21 +11,27 @@ class ScenarioData:
     """Class for handling scenario data."""
     def __init__(self, ts_dict, cost_dict, storage_dict):
 
+        self.probability = None
+
         self.load_level = ts_dict['load_level']
         self.wind_year = ts_dict['wind_year']
         self.solar_year = ts_dict['solar_year']
         self.price_year = ts_dict['price_year']
         self.carbon_year = ts_dict['carbon_year']
 
-        self.wind_cost = cost_dict['wind'] # €/kWp
+        self.wind_capex = cost_dict['wind_capex'] # €/kWp
+        self.wind_opex = cost_dict['wind_opex'] # €/kWp/yr
         self.wind_lifetime = cost_dict['wind_lifetime'] # years
-        self.solar_cost = cost_dict['solar'] # €/kWp
-        self.solar_lifetime = cost_dict['solar_lifetime']
+        self.solar_capex = cost_dict['solar_capex'] # €/kWp
+        self.solar_opex = cost_dict['solar_opex'] # €/kWp/yr
+        self.solar_lifetime = cost_dict['solar_lifetime'] # years
+        self.carbon_price = cost_dict['carbon_price'] # €/kgCO2
 
         self.storage_technologies = sorted(list(storage_dict.keys()))
         self.storage_costs = [storage_dict[tech]['cost'] for tech in self.storage_technologies]
-        self.storage_lifetime = [storage_dict[tech]['lifetime'] for tech in self.storage_technologies]
+        self.storage_lifetimes = [storage_dict[tech]['lifetime'] for tech in self.storage_technologies]
         self.storage_efficiencies = [storage_dict[tech]['efficiency'] for tech in self.storage_technologies]
+        self.discharge_ratios = [storage_dict[tech]['discharge_ratio'] for tech in self.storage_technologies]
 
     def load_timeseries(self, dataset_dir):
         """Load timeseries data from CSV files."""
