@@ -1,0 +1,1 @@
+Install `linopy` and `cmdstanpy` using conda to ensure proper compilation of libraries.
