@@ -1,6 +1,8 @@
 """Implementation of Stochastic Programming model of energy system.
 **Adapted from Building Design VoI implementation**"""
 
+import os
+import yaml
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -218,3 +220,62 @@ class EnergyModel():
                     self.battery_cycles[f's{m}'][tech] = num_cycles
 
         return self.battery_cycles
+
+
+    def save_results(self, fpath):
+        """Save optimized design and objective values to yaml file."""
+
+        design_dict = {
+            'wind_capacity': {
+                'unit': 'kW',
+                'value': float(self.model.variables['wind_capacity'].solution.values),
+            },
+            'solar_capacity': {
+                'unit': 'kWp',
+                'value': float(self.model.variables['solar_capacity'].solution.values),
+            },
+            'storage_capacities': {
+                tech: {
+                    'unit': 'kWh',
+                    'value': float(self.model.variables[f'{tech}_capacity'].solution.values),
+                } for tech in self.techs
+            },
+            'selected_technologies': {
+                tech: bool(self.model.variables['technology_selection'].solution.values[i]) for i,tech in enumerate(self.techs)
+            }
+        }
+
+        overall_objective_dict = {
+            'units': 'Euros',
+            'overall_objective': float(self.corrected_objective),
+            'overall_wind_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['wind'].solution.values for m in range(self.M)]),
+            'overall_solar_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['solar'].solution.values for m in range(self.M)]),
+            'overall_storage_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['storage'].solution.values for m in range(self.M)]),
+            'overall_elec_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['elec'].solution.values for m in range(self.M)]),
+            'overall_carbon_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['carbon'].solution.values for m in range(self.M)])
+        }
+
+        scenario_objective_contributions_dict = {'units': 'Euros'}
+        scenario_objective_contributions_dict.update({
+            f'scenario_{m}': {
+                'wind_cost': float(self.scen_obj_contrs[m]['wind'].solution.values),
+                'solar_cost': float(self.scen_obj_contrs[m]['solar'].solution.values),
+                'storage_cost': float(self.scen_obj_contrs[m]['storage'].solution.values),
+                'elec_cost': float(self.scen_obj_contrs[m]['elec'].solution.values),
+                'carbon_cost': float(self.scen_obj_contrs[m]['carbon'].solution.values)
+            } for m in range(self.M)
+        })
+
+        with open(fpath, 'w') as f:
+            yaml.dump({
+                'design': design_dict,
+                'overall_objective': overall_objective_dict,
+                'scenario_objective_contributions': scenario_objective_contributions_dict
+            }, f, sort_keys=False)
+
+        return design_dict, overall_objective_dict, scenario_objective_contributions_dict
+
+    def save_scenarios(self, dir):
+        """Save scenario data to yaml files."""
+        for m,scenario in enumerate(self.scenarios):
+            scenario.to_file(os.path.join(dir,f'scenario_{m}.yaml'))
