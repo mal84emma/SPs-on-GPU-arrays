@@ -1,0 +1,21 @@
+# Base parameter values
+cost_dict:
+  carbon_price: 1.0 # €/kgCO2
+  solar_capex: 1000.0 # €/kWp
+  solar_lifetime: 20 # years
+  solar_opex: 10 # €/kWp/year
+  wind_capex: 5000.0 # €/kWp
+  wind_lifetime: 20 # years
+  wind_opex: 100 # €/kWp/year
+storage_dict:
+  li-ion:
+    discharge_ratio: 0.4 # kWp/kWh
+  caes:
+    discharge_ratio: tbc
+  thermal:
+    discharge_ratio: tbc
+  vrfb:
+    discharge_ratio: tbc
+ts_dict:
+  carbon_year: 2023
+  price_year: 2023
