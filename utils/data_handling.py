@@ -1,8 +1,6 @@
 """Helper functions for handling scenario data."""
 
 import os
-import csv
-import ast
 import yaml
 import numpy as np
 import pandas as pd
@@ -95,7 +93,7 @@ class ScenarioData:
                     'ts_dict': ts_dict,
                     'cost_dict': cost_dict,
                     'storage_dict': storage_dict
-                }, f)
+                }, f, sort_keys=False)
 
         return ts_dict, cost_dict, storage_dict
 
@@ -114,7 +112,3 @@ class ScenarioData:
         self.norm_solar_gen = pd.read_csv(os.path.join(dataset_dir,'solar',f'{self.solar_year}.csv'))['Solar generation [kW/kWp]'].to_numpy()
         self.elec_prices = pd.read_csv(os.path.join(dataset_dir,'price',f'{self.price_year}.csv'))['Electricity price [EUR/kWh]'].to_numpy()
         self.carbon_intensity = pd.read_csv(os.path.join(dataset_dir,'carbon',f'{self.carbon_year}.csv'))['Carbon intensity [kgCO2/kWh]'].to_numpy()
-
-# TODO: implement saving of optimization results, including scenario data
-# may need to use deeper dir structure for this as scenarios are big and probably
-# need to be saved in separate files
