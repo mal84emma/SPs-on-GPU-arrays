@@ -1,8 +1,8 @@
-/* Gaussian posterior model for mean load given sample measurement */
+/* Gaussian posterior model */
 data {
     real mu;
     real<lower=0> sigma;
-    real error;
+    real<lower=0,upper=1> reduction_factor;
     real z;
 }
 parameters {
@@ -10,5 +10,5 @@ parameters {
 }
 model {
     theta ~ normal(mu,sigma) T[mu-2*sigma,mu+2*sigma];
-    z ~ normal(theta,error*theta);
+    z ~ normal(theta,reduction_factor*sigma);
 }
