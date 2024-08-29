@@ -90,19 +90,18 @@ class ScenarioData:
         if save:
             with open(fpath, 'w') as f:
                 yaml.dump({
-                    'ts_dict': ts_dict,
-                    'cost_dict': cost_dict,
-                    'storage_dict': storage_dict
+                    'timeseries_values': ts_dict,
+                    'cost_values': cost_dict,
+                    'storage_values': storage_dict
                 }, f, sort_keys=False)
 
         return ts_dict, cost_dict, storage_dict
 
     def from_file(fpath):
 
-        with open(fpath, 'r') as f:
-            data = yaml.safe_load(f)
+        with open(fpath, 'r') as f: data = yaml.safe_load(f)
 
-        return ScenarioData(data['ts_dict'], data['cost_dict'], data['storage_dict'])
+        return ScenarioData(data['timeseries_values'], data['cost_values'], data['storage_values'])
 
     def load_timeseries(self, dataset_dir):
         """Load timeseries data from CSV files."""
