@@ -1,4 +1,4 @@
-## Common model settings for all experiments
+## Common model & probability settings for all experiments
 
 # Directories and file patterns
 dataset_dir: [data, processed]
@@ -22,7 +22,6 @@ model_settings:
   grid_capacity: 500.0e+3 # kW
   capex_budget: 5.0e+8 # €/yr (10e9/20)
   solar_capacity_limit: 500.0e+3 # kWp
-  #'technologies_to_use': ['li-ion']
   N_technologies: 1
   allow_elec_purchase: True
   use_CVaR: False

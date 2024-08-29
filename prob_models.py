@@ -21,7 +21,7 @@ def truncnorm_sample(mu, sigma, lower=-2, upper=2):
     return truncnorm.rvs(lower, upper, loc=mu, scale=sigma)
 
 
-def prior_model(prob_settings, base_ts_dict, base_cost_dict, base_storage_dict, n_samples=64):
+def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, n_samples=64):
     """TODO: perform sampling and return list of ScenarioData objects for
     thetas and zs."""
 
@@ -45,7 +45,7 @@ def prior_model(prob_settings, base_ts_dict, base_cost_dict, base_storage_dict, 
             for key in ['cost', 'lifetime', 'efficiency']:
                 storage_dict[tech][key] = truncnorm_sample(*prob_settings[tech][key])
 
-        theta_scenarios.append(ScenarioData(ts_dict, base_cost_dict, storage_dict))
+        theta_scenarios.append(ScenarioData(base_cost_dict, ts_dict, storage_dict))
 
     ## Perform z sampling (storage only)
     for i in range(n_samples):
