@@ -51,6 +51,13 @@ class EnergyModel():
         self.solar_capacity_limit = settings['solar_capacity_limit'] # maximum solar capacity (kWp)
         self.capex_budget = settings['capex_budget'] # maximum capital expenditure (€, annualised)
 
+        assert type(settings['use_CVaR']) == bool, "use_CVaR must be a boolean."
+        assert 0 < settings['CVaR_alpha'] < 0.5, "CVaR_alpha must be between 0 and 0.5."
+        assert settings['CVaR_beta'] > 0, "CVaR_beta must be positive."
+        self.use_CVaR = settings['use_CVaR'] # use Conditional Value at Risk in objective
+        self.alpha = settings['CVaR_alpha'] # confidence level
+        self.beta = settings['CVaR_beta'] # risk aversion parameter
+
         self.scenarios = scenarios
         self.M = len(scenarios) # number of scenarios
 
@@ -86,7 +93,7 @@ class EnergyModel():
         # access objects
         self.scen_obj_contrs = {}
         self.grid_energies = {}
-        scen_objectives = []
+        self.scenario_objectives = []
 
         ## Scenarios
         for m,scenario  in enumerate(scenarios):
@@ -151,14 +158,27 @@ class EnergyModel():
                 'carbon': pos_grid_energy @ carbon_intensity * scenario.carbon_price
             }
 
-            scen_obj = sum(self.scen_obj_contrs[m].values())
-            scen_objectives.append(scen_obj)
-
+            self.scenario_objectives.append(sum(self.scen_obj_contrs[m].values()))
             self.model.add_constraints(sum([self.scen_obj_contrs[m][key] for key in ['wind','solar','storage']]), '<=', self.capex_budget, name=f'capex_budget_s{m}')
             # planned capacities must be within budget in all scenarios - capacity decision made before costs perfectly known
 
         ## Overall objective
-        self.model.add_objective(self.scenario_weightings @ scen_objectives)
+        self.scenario_objectives = np.array(self.scenario_objectives)
+        objective = self.scenario_weightings @ self.scenario_objectives
+
+        if self.use_CVaR: # add CVaR objective contribution & constraints
+            xi = self.model.add_variables(name='CVaR_value_threshold')
+            etas = self.model.add_variables(lower=0, name='CVaR_slack', coords=[pd.RangeIndex(self.M,name='scenarios')])
+
+            for m in range(self.M): # add eta constraints per scenario (due to xarray datatype headaches)
+                self.model.add_constraints(etas[m] + xi[0], '>=', self.scenario_objectives[m] - self.scenario_objectives.mean(), name=f'CVaR_threshold_s{m}')
+                # see notes on relative loss CVaR formulation
+
+            self.CVaR_obj_contribution = self.beta*(xi + 1/self.alpha*(self.scenario_weightings*etas).sum())
+            objective += self.CVaR_obj_contribution
+        # endif
+
+        self.model.add_objective(objective, sense='min')
 
         return self.model
 

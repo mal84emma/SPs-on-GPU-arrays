@@ -25,8 +25,8 @@ model_settings:
   N_technologies: 1
   allow_elec_purchase: True
   use_CVaR: False
-  alpha: ...
-  beta: ...
+  CVaR_alpha: 0.1 # TODO: confirm
+  CVaR_beta: 1 # TODO: confirm
 
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]
