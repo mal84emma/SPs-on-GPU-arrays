@@ -1,8 +1,9 @@
 """Definition of probabilistic models for decision problem."""
 
 import os
+import yaml
 import numpy as np
-from scipy.stats import truncnorm
+from scipy.stats import norm, truncnorm
 from cmdstanpy import CmdStanModel
 
 # Turn off Stan logging
@@ -53,8 +54,10 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
 
         for tech in storage_dict.keys():
             for key in ['cost', 'lifetime', 'efficiency']:
-                # TODO: figure out measurement probability model
-                storage_dict[tech][key] = ...(*prob_settings[tech][key])
+                storage_dict[tech][key] = norm.rvs(
+                    loc=storage_dict[tech][key], # theta sample
+                    scale=prob_settings[tech][key][1]*prob_settings['measurement_sigma_reduction'] # reduced sigma
+                )
 
         z_scenarios.append(ScenarioData(ts_dict, cost_dict, storage_dict))
 
@@ -70,10 +73,30 @@ def posterior_model(z_scenario, prob_settings, n_samples=64):
     ## Perform vartheta sampling (storage only)
     vartheta_samples = {}
     for tech in storage_dict.keys():
+        vartheta_samples[tech] = {}
         for key in ['cost', 'lifetime', 'efficiency']:
-            # TODO: implement STAN posterior sampling
-            samples = ...
-            vartheta_samples[tech][key] = samples
+            # Load STAN model and perform sampling
+            posterior_file = os.path.join('stan_models','posterior.stan')
+            stan_model = CmdStanModel(stan_file=posterior_file)
+
+            data = {
+                'mu':prob_settings[tech][key][0],
+                'sigma':prob_settings[tech][key][1],
+                'reduction_factor':prob_settings['measurement_sigma_reduction'],
+                'z':storage_dict[tech][key]
+            }
+            inits = {'theta':prob_settings[tech][key][0]}
+
+            posterior_fit = stan_model.sample(
+                    data=data,
+                    inits=inits,
+                    iter_warmup=n_samples,
+                    iter_sampling=n_samples*prob_settings['sampling_thin_factor'],
+                    chains=1,
+                    show_progress=False
+                )
+
+            vartheta_samples[tech][key] = posterior_fit.stan_variable('theta')[::prob_settings['sampling_thin_factor']]
 
     ## Assign samples to scenarios and create objects
     vartheta_scenarios = []
@@ -84,3 +107,35 @@ def posterior_model(z_scenario, prob_settings, n_samples=64):
         vartheta_scenarios.append(ScenarioData(ts_dict, cost_dict, storage_dict))
 
     return vartheta_scenarios
+
+
+if __name__ == '__main__':
+
+    n_samples = 5
+
+    with open(os.path.join('configs','base_settings.yaml'), 'r') as f: settings = yaml.safe_load(f)
+    prob_settings = settings['probability_settings']
+
+    with open(os.path.join('configs','base_params.yaml'), 'r') as f: params = yaml.safe_load(f)
+    cost_dict = params['cost_values']
+    ts_dict = params['timeseries_values']
+    storage_dict = params['storage_values']
+
+    # Test prior sampling
+    print('Testing prior sampling...')
+    theta_scenarios, z_scenarios = prior_model(prob_settings, cost_dict, ts_dict, storage_dict, n_samples=n_samples)
+    for i in range(n_samples):
+        print(f'Sample {i}')
+        for attr in ['storage_costs','storage_lifetimes','storage_efficiencies']:
+            print(f'{attr}, t', getattr(theta_scenarios[i],attr))
+            print(f'{attr}, z', getattr(z_scenarios[i],attr))
+    print('')
+
+    # Test posterior sampling
+    print('Testing posterior sampling...')
+    vartheta_scenarios = posterior_model(z_scenarios[0], prob_settings, n_samples=n_samples)
+    for attr in ['storage_costs','storage_lifetimes','storage_efficiencies']:
+        print(attr)
+        print(f'original', getattr(z_scenarios[0],attr))
+        for i in range(n_samples):
+            print(f'sample {i}', getattr(vartheta_scenarios[i],attr))
