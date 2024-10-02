@@ -32,10 +32,23 @@ model_settings:
 probability_settings: # tuples are [mu,sigma]
   TODO: ...
   measurement_sigma_reduction: 0.25 # TODO: confirm
+  sampling_thin_factor: 10
   load_level: [250000,25000]
   wind_years: *wind_years
   solar_years: *solar_years
-  li-ion: # TODO: work out distributions
-    cost: []
-    lifetime: []
-    efficiency: []
+  Li-ion:
+    cost: [800,250]
+    lifetime: [12.5,3.75]
+    efficiency: [92,3.5]
+  # CAES:
+  #   cost: [200,50]
+  #   lifetime: [...,...]
+  #   efficiency: [...,...]
+  PCM:
+    cost: [40,15]
+    lifetime: [30,5]
+    efficiency: [65,12.5]
+  VRBF:
+    cost: [600,200]
+    lifetime: [12.5,3.75]
+    efficiency: [75,5]
