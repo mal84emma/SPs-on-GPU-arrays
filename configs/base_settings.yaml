@@ -17,7 +17,7 @@ wind_location: [52.7,3.5]
 # Default energy model settings
 model_settings:
   T: 8760
-  initial_SoC: 0.5
+  initial_SoC: 0.75 # must be > 1 - min(DoD)
   max_storage_cap: 1.0e+9 # slack bound
   grid_capacity: 500.0e+3 # kW
   capex_budget: 5.0e+8 # €/yr (10e9/20)
@@ -30,25 +30,28 @@ model_settings:
 
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]
-  TODO: ...
   measurement_sigma_reduction: 0.25 # TODO: confirm
   sampling_thin_factor: 10
   load_level: [250000,25000]
   wind_years: *wind_years
   solar_years: *solar_years
-  Li-ion:
-    cost: [800,250]
-    lifetime: [12.5,3.75]
-    efficiency: [92,3.5]
-  # CAES:
-  #   cost: [200,50]
-  #   lifetime: [...,...]
-  #   efficiency: [...,...]
-  PCM:
-    cost: [40,15]
+  CAES:
+    cost: [50,15]
     lifetime: [30,5]
-    efficiency: [65,12.5]
-  VRBF:
-    cost: [600,200]
+    efficiency: [0.6,0.025]
+  Li-ion:
+    cost: [200,50]
+    lifetime: [20,5]
+    efficiency: [0.92,0.035]
+  Pb-acid:
+    cost: [150,50]
     lifetime: [12.5,3.75]
-    efficiency: [75,5]
+    efficiency: [0.725,0.0375]
+  VRBF:
+    cost: [250,75]
+    lifetime: [20,5]
+    efficiency: [0.75,0.05]
+  # PCM:
+  #   cost: [40,15]
+  #   lifetime: [30,5]
+  #   efficiency: [0.65,0.125]

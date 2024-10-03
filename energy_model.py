@@ -110,6 +110,7 @@ class EnergyModel():
             for i,tech in enumerate(self.techs):
                 storage_capacity = storage_capacities[i]
                 P_max = scenario.discharge_ratios[i]*storage_capacity
+                E_min = (1-scenario.depths_of_discharge[i])*storage_capacity
                 eta = scenario.storage_efficiencies[i]
 
                 # Dynamics decision variables
@@ -125,6 +126,7 @@ class EnergyModel():
                 self.model.add_constraints(Eout, '<=', P_max*self.delta_t, name=f'Pout_max_i{i}_s{m}')
 
                 self.model.add_constraints(SOC, '<=', storage_capacity, name=f'SOC_max_i{i}_s{m}')
+                self.model.add_constraints(SOC, '>=', E_min, name=f'SOC_min_i{i}_s{m}')
 
                 battery_energy += (Ein - Eout)
 

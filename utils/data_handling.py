@@ -45,6 +45,7 @@ class ScenarioData:
         self.storage_lifetimes = [storage_dict[tech]['lifetime'] for tech in self.storage_technologies]
         self.storage_efficiencies = [storage_dict[tech]['efficiency'] for tech in self.storage_technologies]
         self.discharge_ratios = [storage_dict[tech]['discharge_ratio'] for tech in self.storage_technologies]
+        self.depths_of_discharge = [storage_dict[tech]['depth_of_discharge'] for tech in self.storage_technologies]
 
     def __str__(self):
 
@@ -97,7 +98,8 @@ class ScenarioData:
                 'cost': self.storage_costs[i],
                 'lifetime': self.storage_lifetimes[i],
                 'efficiency': self.storage_efficiencies[i],
-                'discharge_ratio': self.discharge_ratios[i]
+                'discharge_ratio': self.discharge_ratios[i],
+                'depth_of_discharge': self.depths_of_discharge[i]
             } for i, tech in enumerate(self.storage_technologies)
         }
 

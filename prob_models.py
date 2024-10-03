@@ -2,6 +2,7 @@
 
 import os
 import yaml
+import copy
 import numpy as np
 from scipy.stats import norm, truncnorm
 from cmdstanpy import CmdStanModel
@@ -33,8 +34,8 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
 
     ## Perform theta sampling
     for i in range(n_samples):
-        ts_dict = base_ts_dict.copy()
-        storage_dict = base_storage_dict.copy()
+        ts_dict = copy.deepcopy(base_ts_dict)
+        storage_dict = copy.deepcopy(base_storage_dict)
 
         # Sample timeseries parameters
         ts_dict['load_level'] = float(truncnorm_sample(*prob_settings['load_level']))
