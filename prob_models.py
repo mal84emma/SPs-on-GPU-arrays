@@ -37,14 +37,14 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
         storage_dict = base_storage_dict.copy()
 
         # Sample timeseries parameters
-        ts_dict['load_level'] = truncnorm_sample(*prob_settings['load_level'])
-        ts_dict['wind_year'] = np.random.choice(prob_settings['wind_years'])
-        ts_dict['solar_year'] = np.random.choice(prob_settings['solar_years'])
+        ts_dict['load_level'] = float(truncnorm_sample(*prob_settings['load_level']))
+        ts_dict['wind_year'] = int(np.random.choice(prob_settings['wind_years']))
+        ts_dict['solar_year'] = int(np.random.choice(prob_settings['solar_years']))
 
         # Sample storage parameters (all with truncnorm distributions)
         for tech in storage_dict.keys():
             for key in ['cost', 'lifetime', 'efficiency']:
-                storage_dict[tech][key] = truncnorm_sample(*prob_settings[tech][key])
+                storage_dict[tech][key] = float(truncnorm_sample(*prob_settings[tech][key]))
 
         theta_scenarios.append(ScenarioData(base_cost_dict, ts_dict, storage_dict))
 
@@ -54,10 +54,10 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
 
         for tech in storage_dict.keys():
             for key in ['cost', 'lifetime', 'efficiency']:
-                storage_dict[tech][key] = norm.rvs(
+                storage_dict[tech][key] = float(norm.rvs(
                     loc=storage_dict[tech][key], # theta sample
                     scale=prob_settings[tech][key][1]*prob_settings['measurement_sigma_reduction'] # reduced sigma
-                )
+                ))
 
         z_scenarios.append(ScenarioData(ts_dict, cost_dict, storage_dict))
 
@@ -103,7 +103,7 @@ def posterior_model(z_scenario, prob_settings, n_samples=64):
     for i in range(n_samples):
         for tech in storage_dict.keys():
             for key in ['cost', 'lifetime', 'efficiency']:
-                storage_dict[tech][key] = vartheta_samples[tech][key][i]
+                storage_dict[tech][key] = float(vartheta_samples[tech][key][i])
         vartheta_scenarios.append(ScenarioData(ts_dict, cost_dict, storage_dict))
 
     return vartheta_scenarios

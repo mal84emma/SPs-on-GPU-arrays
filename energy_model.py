@@ -186,7 +186,6 @@ class EnergyModel():
     def solve(self, **kwargs):
 
         # ToDo arg parsing for solvers
-
         self.model.solve(**kwargs)
 
         load_elec_cost = self.scenario_weightings @ [self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T] for m in range(self.M)]
@@ -285,6 +284,11 @@ class EnergyModel():
                 'carbon_cost': float(self.scen_obj_contrs[m]['carbon'].solution.values)
             } for m in range(self.M)
         })
+
+
+        if os.path.dirname(fpath) != '':
+            if not os.path.exists(os.path.dirname(fpath)):
+                os.makedirs(os.path.dirname(fpath))
 
         with open(fpath, 'w') as f:
             yaml.dump({

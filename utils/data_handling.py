@@ -102,6 +102,10 @@ class ScenarioData:
         }
 
         if save:
+            if os.path.dirname(fpath) != '':
+                if not os.path.exists(os.path.dirname(fpath)):
+                    os.makedirs(os.path.dirname(fpath))
+
             with open(fpath, 'w') as f:
                 yaml.dump({
                     'cost_values': cost_dict,
