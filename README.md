@@ -1,1 +1,2 @@
 Install `linopy` and `cmdstanpy` using conda to ensure proper compilation of libraries.
+Note, this needs to be done **before** pip installing the rest of the packages to ensure compatible libraries are installed.
