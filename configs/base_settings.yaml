@@ -28,10 +28,16 @@ model_settings:
   CVaR_alpha: 0.1 # TODO: confirm
   CVaR_beta: 1 # TODO: confirm
 
+# Default solver settings
+solver_settings:
+  verbose: False
+
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]
-  measurement_sigma_reduction: 0.25 # TODO: confirm
+  n_prior_samples: 64
+  n_posterior_samples: 64
   sampling_thin_factor: 10
+  measurement_sigma_reduction: 0.25 # TODO: confirm
   load_level: [250000,25000]
   wind_years: *wind_years
   solar_years: *solar_years

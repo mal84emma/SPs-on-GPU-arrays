@@ -1,0 +1,11 @@
+# Model settings for test experiments
+
+results_dir: [results, test]
+
+solver_settings:
+  verbose: False
+  threads: 1 # no. Gurobi threads
+
+probability_settings:
+  n_prior_samples: 5
+  n_posterior_samples: 5

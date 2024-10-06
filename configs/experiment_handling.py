@@ -10,6 +10,8 @@ def get_experiment_config(expt_id):
     # Get experiment name from ID
     if expt_id == 0:
         expt_name = 'base_settings'
+    elif expt_id == -1:
+        expt_name = 'test_settings'
     elif expt_id == 1:
         expt_name = 'two_tech_settings'
     elif expt_id == 2:
