@@ -24,3 +24,8 @@ temp*
 stan_models/*
 # Unignore stan files in stan_models dir
 !stan_models/*.stan
+
+## Ignore HPC runtime files
+logs
+slurm*
+machine.file*
