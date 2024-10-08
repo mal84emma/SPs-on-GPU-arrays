@@ -3,7 +3,7 @@
 import os
 import sys
 import yaml
-import time
+import shutil
 
 from tqdm import tqdm
 import multiprocess as mp
@@ -15,6 +15,8 @@ from configs import get_experiment_config
 
 
 def posterior_design(measured_scenario_id, settings, restricted_tech):
+
+    save_dir = os.path.join(*settings['results_dir'],'posterior',f'z_scenario_{measured_scenario_id}')
 
     # Load posterior samples
     posterior_scenarios_dir = os.path.join(*settings['results_dir'],'scenarios','varthetas')
@@ -28,15 +30,26 @@ def posterior_design(measured_scenario_id, settings, restricted_tech):
 
     elif restricted_tech: # perform design without optionality (restricted)
         design_name = 'restricted_design'
+
         # load storage technologies selected in prior design
         with open(os.path.join(*settings['results_dir'],'prior','design.yaml'), 'r') as f: prior_design = yaml.safe_load(f)
         selected_technologies = [k for k,v in prior_design['design']['selected_technologies'].items() if v]
         settings['model_settings']['technologies_to_use'] = selected_technologies # update model settings
 
+        # check if unrestricted design used prior selected technologies
+        open_design_file = os.path.join(save_dir,f'open_design.yaml')
+        if os.path.isfile(open_design_file):
+            with open(open_design_file, 'r') as f: open_design = yaml.safe_load(f)
+            if open_design['design']['selected_technologies'] == prior_design['design']['selected_technologies']:
+                # skip computation of restriction design, as same as open design
+                print(f"Skipping restricted design for scenario {measured_scenario_id} as open design used prior selected technologies")
+                shutil.copy(open_design_file, os.path.join(save_dir,f'restricted_design.yaml'))
+                return
+
     # Perform design
     print(f"Starting posterior {design_name} for scenario {measured_scenario_id} @ {get_current_time()}")
     solved_model = solve_model(posterior_scenarios, settings)
-    solved_model.save_results(os.path.join(*settings['results_dir'],'posterior',f'z_scenario_{measured_scenario_id}',f'{design_name}.yaml'))
+    solved_model.save_results(os.path.join(save_dir,f'{design_name}.yaml'))
     print(f"Finished posterior {design_name} for scenario {measured_scenario_id} @ {get_current_time()}")
 
 
