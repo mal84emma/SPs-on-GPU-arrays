@@ -5,7 +5,9 @@ Install steps,
 ```
 conda create env -n EP-VOI python=3.9
 conda activate EP-VOI
-conda install -c conda-forge linopy
-conda install -c conda-forge cmdstanpy
+conda install -c conda-forge linopy=0.3.14
+conda install -c conda-forge cmdstanpy=1.2.4
 pip install -r requirements.txt
 ```
+
+For machine where only SP solving to to be performed, install `linopy=0.3.14` and use `reqs-solve-only.txt` for minimal install.
