@@ -97,6 +97,7 @@ class ScenarioData:
             tech: {
                 'cost': self.storage_costs[i],
                 'lifetime': self.storage_lifetimes[i],
+                'annual_cost': self.storage_costs[i] / self.storage_lifetimes[i],
                 'efficiency': self.storage_efficiencies[i],
                 'discharge_ratio': self.discharge_ratios[i],
                 'depth_of_discharge': self.depths_of_discharge[i]
