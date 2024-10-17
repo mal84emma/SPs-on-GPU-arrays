@@ -57,7 +57,7 @@ def solve_model(
 def try_all_designs(
         scenarios: List[ScenarioData],
         settings: Dict,
-        save_all: bool = False
+        save_all: str = None
     ) -> EnergyModel:
     """Construct and solve Scenario Programming model of energy system
     for all combinations of available storage technologies, and select
@@ -68,8 +68,8 @@ def try_all_designs(
             time series data to use in Scenario Programming model.
         settings (Dict): Dictionary of settings used to construct model.
             See configs/base_settings.yaml for required keys.
-        save_all (bool, optional): Whether to save designs with all storage
-            combinations to file. Defaults to False.
+        save_all (str, optional): Path to save results for all technology
+            combinations to file. Not saved to file if `None`. Defaults to None.
 
     Returns:
         EnergyModel: Optimised model object with best storage combination.
@@ -88,7 +88,9 @@ def try_all_designs(
 
         solved_model = solve_model(scenarios, settings)
 
-        if save_all: solved_model.save_results(os.path.join(*settings['results_dir'],'prior',f'{techs_str}_design.yaml'))
+        if save_all is not None:
+            solved_model.save_results(os.path.join(save_all,f'{techs_str}_design.yaml'))
+
         if solved_model.corrected_objective < best_objective:
             best_objective = solved_model.corrected_objective
             best_model = solved_model

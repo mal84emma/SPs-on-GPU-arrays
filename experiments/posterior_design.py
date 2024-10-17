@@ -51,7 +51,7 @@ def posterior_design(measured_scenario_id, settings, restricted_tech):
     # Perform design
     print(f"Starting posterior {design_name} for scenario {measured_scenario_id} @ {get_current_time()}")
     if not restricted_tech:
-        solved_model = try_all_designs(posterior_scenarios, settings, save_all=False)
+        solved_model = try_all_designs(posterior_scenarios, settings)
     elif restricted_tech:
         solved_model = solve_model(posterior_scenarios, settings)
     solved_model.save_results(os.path.join(save_dir,f'{design_name}.yaml'))

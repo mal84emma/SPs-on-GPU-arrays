@@ -24,6 +24,6 @@ if __name__ == "__main__":
 
     # Perform design
     print(f"Starting prior design @ {get_current_time()}")
-    best_model = try_all_designs(prior_scenarios, settings, save_all=True)
+    best_model = try_all_designs(prior_scenarios, settings, save_all=os.path.join(*settings['results_dir'],'prior'))
     best_model.save_results(os.path.join(*settings['results_dir'],'prior','best_design.yaml'))
     print(f"Finished prior design @ {get_current_time()}")
