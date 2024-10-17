@@ -95,13 +95,13 @@ class ScenarioData:
         }
         storage_dict = {
             tech: {
-                'cost': self.storage_costs[i],
-                'lifetime': self.storage_lifetimes[i],
-                'annual_cost': self.storage_costs[i] / self.storage_lifetimes[i],
-                'efficiency': self.storage_efficiencies[i],
-                'discharge_ratio': self.discharge_ratios[i],
-                'depth_of_discharge': self.depths_of_discharge[i]
-            } for i, tech in enumerate(self.storage_technologies)
+                'cost': self.storage_costs[tech],
+                'lifetime': self.storage_lifetimes[tech],
+                'annual_cost': self.storage_costs[tech] / self.storage_lifetimes[tech],
+                'efficiency': self.storage_efficiencies[tech],
+                'discharge_ratio': self.discharge_ratios[tech],
+                'depth_of_discharge': self.depths_of_discharge[tech]
+            } for tech in self.storage_technologies
         }
 
         if save:
