@@ -27,7 +27,7 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
     """TODO: perform sampling and return list of ScenarioData objects for
     thetas and zs."""
 
-    assert all([key in prob_settings.keys() for key in base_storage_dict.keys()]), "Must provide probability settings for all storage technologies."
+    assert all([key in prob_settings['storage'].keys() for key in base_storage_dict.keys()]), "Must provide probability settings for all storage technologies."
 
     theta_scenarios = []
     z_scenarios = []
@@ -45,7 +45,7 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
         # Sample storage parameters (all with truncnorm distributions)
         for tech in storage_dict.keys():
             for key in ['cost', 'lifetime', 'efficiency']:
-                storage_dict[tech][key] = float(truncnorm_sample(*prob_settings[tech][key]))
+                storage_dict[tech][key] = float(truncnorm_sample(*prob_settings['storage'][tech][key]))
 
         theta_scenarios.append(ScenarioData(base_cost_dict, ts_dict, storage_dict))
 
@@ -57,7 +57,7 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
             for key in ['cost', 'lifetime', 'efficiency']:
                 storage_dict[tech][key] = float(norm.rvs(
                     loc=storage_dict[tech][key], # theta sample
-                    scale=prob_settings[tech][key][1]*prob_settings['measurement_sigma_reduction'] # reduced sigma
+                    scale=prob_settings['storage'][tech][key][1]*prob_settings['measurement_sigma_reduction'] # reduced sigma
                 ))
 
         z_scenarios.append(ScenarioData(ts_dict, cost_dict, storage_dict))
@@ -81,8 +81,8 @@ def posterior_model(z_scenario, prob_settings, n_samples=64):
             stan_model = CmdStanModel(stan_file=posterior_file)
 
             data = {
-                'mu':prob_settings[tech][key][0],
-                'sigma':prob_settings[tech][key][1],
+                'mu':prob_settings['storage'][tech][key][0],
+                'sigma':prob_settings['storage'][tech][key][1],
                 'reduction_factor':prob_settings['measurement_sigma_reduction'],
                 'z':storage_dict[tech][key]
             }

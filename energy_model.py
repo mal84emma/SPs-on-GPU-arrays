@@ -9,7 +9,7 @@ import xarray as xr
 from linopy import Model
 from utils.data_handling import ScenarioData
 
-from typing import Iterable
+from typing import Iterable, Tuple, Dict
 
 
 class EnergyModel():
@@ -27,7 +27,7 @@ class EnergyModel():
 
         ## Setup: data validation & formatting
         ## ===================================
-        expected_keys = ['T','initial_SoC','max_storage_cap','N_technologies','allow_elec_purchase','grid_capacity','solar_capacity_limit','capex_budget']
+        expected_keys = ['T','initial_SoC','N_technologies','allow_elec_purchase','grid_capacity','solar_capacity_limit','capex_budget']
         assert all([key in settings for key in expected_keys]), "Settings dict must contain all required keys."
 
         assert type(settings['T']) == int, "T must be an integer."
@@ -38,12 +38,11 @@ class EnergyModel():
         assert 0 <= settings['initial_SoC'] <= 1, "initial_SoC must be between 0 and 1."
         self.initial_SoC = settings['initial_SoC'] # initial (fractional) state of charge
 
-        assert all([scenario.storage_technologies == scenarios[0].storage_technologies for scenario in scenarios]), "Storage technologies must be consistent across scenarios."
-        self.techs = scenarios[0].storage_technologies
-        assert settings['max_storage_cap'] > 0, "max_storage_cap must be positive (a should be very large - slack)."
-        self.max_storage_cap = settings['max_storage_cap'] # maximum storage capacity
-        assert 0 < settings['N_technologies'] <= len(self.techs), "N_technologies must be between 1 and the number of available storage technologies."
-        self.N_technologies = settings['N_technologies'] # number of technologies to select
+        assert 'storage_technologies' in settings.keys(), "`storage_technologies` must be specified in settings (list of technologies used in specified system)."
+        self.techs = settings['storage_technologies'] # storage technologies
+        assert len(self.techs) > 0, "At least one storage technology must be used."
+        assert len(self.techs) == settings['N_technologies'], "Number of used storage technologies must match `N_technologies`."
+        assert all([tech in scenario.storage_technologies for tech in self.techs for scenario in scenarios]), "Storage technologies must be available in all scenarios."
 
         assert type(settings['allow_elec_purchase']) == bool, "allow_elec_purchase must be a boolean."
         self.allow_elec_purchase = settings['allow_elec_purchase'] # allow electricity purchase from grid
@@ -76,19 +75,9 @@ class EnergyModel():
         ## Capacity variables
         wind_capacity = self.model.add_variables(lower=0, name='wind_capacity')
         solar_capacity = self.model.add_variables(lower=0, name='solar_capacity')
-        storage_capacities = [self.model.add_variables(lower=0, name=f'{tech}_capacity') for tech in self.techs]
-        technology_selection = self.model.add_variables(name='technology_selection', binary=True, coords=[pd.RangeIndex(len(self.techs),name='technologies')])
+        storage_capacities = {tech: self.model.add_variables(lower=0, name=f'{tech}_capacity') for tech in self.techs}
 
         self.model.add_constraints(solar_capacity, '<=', self.solar_capacity_limit, name='solar_capacity_limit')
-
-        ## Storage technology selection (constraints)
-        for i,tech in enumerate(self.techs):
-            self.model.add_constraints(storage_capacities[i], '<=', (technology_selection[i]*self.max_storage_cap).to_linexpr(), name=f'{tech}_selection_slack_capacity')
-        if 'technologies_to_use' in settings.keys(): # fix SP to use specific technologies
-            assert all([tech in self.techs for tech in settings['technologies_to_use']]), "technologies_to_use must be a subset of available storage technologies."
-            self.model.add_constraints(technology_selection, '=', [1 if tech in settings['technologies_to_use'] else 0 for tech in self.techs], name='tech_selection_fixed')
-        else: # make SP choose N_technologies
-            self.model.add_constraints(technology_selection.sum(), '=', self.N_technologies, name='tech_selection_sum')
 
         # access objects
         self.scen_obj_contrs = {}
@@ -107,26 +96,26 @@ class EnergyModel():
             ## Dynamics
             battery_energy = 0 # net energy flow *into* batteries
 
-            for i,tech in enumerate(self.techs):
-                storage_capacity = storage_capacities[i]
-                P_max = scenario.discharge_ratios[i]*storage_capacity
-                E_min = (1-scenario.depths_of_discharge[i])*storage_capacity
-                eta = scenario.storage_efficiencies[i]
+            for tech in self.techs:
+                storage_capacity = storage_capacities[tech]
+                P_max = scenario.discharge_ratios[tech]*storage_capacity
+                E_min = (1-scenario.depths_of_discharge[tech])*storage_capacity
+                eta = scenario.storage_efficiencies[tech]
 
                 # Dynamics decision variables
-                SOC = self.model.add_variables(lower=0, name=f'SOC_i{i}_s{m}', coords=[pd.RangeIndex(self.T,name='time')])
-                Ein = self.model.add_variables(lower=0, name=f'Ein_i{i}_s{m}', coords=[pd.RangeIndex(self.T,name='time')])
-                Eout = self.model.add_variables(lower=0, name=f'Eout_i{i}_s{m}', coords=[pd.RangeIndex(self.T,name='time')])
+                SOC = self.model.add_variables(lower=0, name=f'SOC_{tech}_s{m}', coords=[pd.RangeIndex(self.T,name='time')])
+                Ein = self.model.add_variables(lower=0, name=f'Ein_{tech}_s{m}', coords=[pd.RangeIndex(self.T,name='time')])
+                Eout = self.model.add_variables(lower=0, name=f'Eout_{tech}_s{m}', coords=[pd.RangeIndex(self.T,name='time')])
 
                 # Dynamics constraints
-                self.model.add_constraints(self.initial_SoC*storage_capacity[0] + -1*SOC[0] + np.sqrt(eta)*Ein[0] - 1/np.sqrt(eta)*Eout[0], '=', 0, name=f'SOC_init_i{i}_s{m}')
-                self.model.add_constraints(SOC[:-1] - SOC[1:] + np.sqrt(eta)*Ein[1:] - 1/np.sqrt(eta)*Eout[1:], '=', 0, name=f'SOC_series_i{i}_s{m}')
+                self.model.add_constraints(self.initial_SoC*storage_capacity[0] + -1*SOC[0] + np.sqrt(eta)*Ein[0] - 1/np.sqrt(eta)*Eout[0], '=', 0, name=f'SOC_init_{tech}_s{m}')
+                self.model.add_constraints(SOC[:-1] - SOC[1:] + np.sqrt(eta)*Ein[1:] - 1/np.sqrt(eta)*Eout[1:], '=', 0, name=f'SOC_series_{tech}_s{m}')
 
-                self.model.add_constraints(Ein, '<=', P_max*self.delta_t, name=f'Pin_max_i{i}_s{m}')
-                self.model.add_constraints(Eout, '<=', P_max*self.delta_t, name=f'Pout_max_i{i}_s{m}')
+                self.model.add_constraints(Ein, '<=', P_max*self.delta_t, name=f'Pin_max_{tech}_s{m}')
+                self.model.add_constraints(Eout, '<=', P_max*self.delta_t, name=f'Pout_max_{tech}_s{m}')
 
-                self.model.add_constraints(SOC, '<=', storage_capacity, name=f'SOC_max_i{i}_s{m}')
-                self.model.add_constraints(SOC, '>=', E_min, name=f'SOC_min_i{i}_s{m}')
+                self.model.add_constraints(SOC, '<=', storage_capacity, name=f'SOC_max_{tech}_s{m}')
+                self.model.add_constraints(SOC, '>=', E_min, name=f'SOC_min_{tech}_s{m}')
 
                 battery_energy += (Ein - Eout)
 
@@ -150,8 +139,8 @@ class EnergyModel():
 
             ## Scenario objective
             storage_cost = 0
-            for i,tech in enumerate(self.techs):
-                storage_cost += (scenario.storage_costs[i]/scenario.storage_lifetimes[i])*storage_capacities[i]
+            for tech in self.techs:
+                storage_cost += (scenario.storage_costs[tech]/scenario.storage_lifetimes[tech])*storage_capacities[tech]
             self.scen_obj_contrs[m] = {
                 'wind': (scenario.wind_capex/scenario.wind_lifetime + scenario.wind_opex) * wind_capacity,
                 'solar': (scenario.solar_capex/scenario.solar_lifetime + scenario.solar_opex) * solar_capacity,
@@ -186,6 +175,7 @@ class EnergyModel():
 
 
     def solve(self, **kwargs):
+        """Solve constructed model and report corrected objective value."""
 
         # ToDo arg parsing for solvers
         self.model.solve(**kwargs)
@@ -206,12 +196,12 @@ class EnergyModel():
         for m in range(self.M):
             total_dumped = 0
 
-            for i,tech in enumerate(self.techs):
-                eta = self.scenarios[m].storage_efficiencies[i]
-                e2 = getattr(self.model.variables,f'Ein_i{i}_s{m}').solution * getattr(self.model.variables,f'Eout_i{i}_s{m}').solution
+            for tech in self.techs:
+                eta = self.scenarios[m].storage_efficiencies[tech]
+                e2 = getattr(self.model.variables,f'Ein_{tech}_s{m}').solution * getattr(self.model.variables,f'Eout_{tech}_s{m}').solution
 
-                Ein_dumps = getattr(self.model.variables,f'Ein_i{i}_s{m}').solution.where(e2 > 0, 0)
-                Eout_dumps = getattr(self.model.variables,f'Eout_i{i}_s{m}').solution.where(e2 > 0, 0)
+                Ein_dumps = getattr(self.model.variables,f'Ein_{tech}_s{m}').solution.where(e2 > 0, 0)
+                Eout_dumps = getattr(self.model.variables,f'Eout_{tech}_s{m}').solution.where(e2 > 0, 0)
                 net_energy_in = Ein_dumps - Eout_dumps
                 net_energy_gain = np.sqrt(eta)*Ein_dumps - 1/np.sqrt(eta)*Eout_dumps
                 dumped_energy = net_energy_in - net_energy_gain
@@ -232,10 +222,10 @@ class EnergyModel():
 
         for m in range(self.M):
             self.battery_cycles[f's{m}'] = {}
-            for i,tech in enumerate(self.techs):
+            for tech in self.techs:
                 if self.model.variables[f'{tech}_capacity'].solution > 0:
-                    charged_energy = getattr(self.model.variables,f'Ein_i{i}_s{m}').solution.sum()
-                    discharged_energy = getattr(self.model.variables,f'Eout_i{i}_s{m}').solution.sum()
+                    charged_energy = getattr(self.model.variables,f'Ein_{tech}_s{m}').solution.sum()
+                    discharged_energy = getattr(self.model.variables,f'Eout_{tech}_s{m}').solution.sum()
                     total_energy_flow = charged_energy + discharged_energy
                     num_cycles = total_energy_flow.values / (2*self.model.variables[f'{tech}_capacity'].solution.values)
                     self.battery_cycles[f's{m}'][tech] = num_cycles
@@ -243,8 +233,15 @@ class EnergyModel():
         return self.battery_cycles
 
 
-    def save_results(self, fpath):
-        """Save optimized design and objective values to yaml file."""
+    def save_results(self, fpath: str) -> Tuple[Dict]:
+        """Save optimized design and objective values to yaml file.
+
+        Args:
+            fpath (str): Path to save yaml file. If '' then no file is saved.
+
+        Returns:
+            Tuple[Dict]: Dictionaries of design, overall objective, and scenario objective contributions.
+        """
 
         design_dict = {
             'wind_capacity': {
@@ -255,14 +252,12 @@ class EnergyModel():
                 'unit': 'kWp',
                 'value': float(self.model.variables['solar_capacity'].solution.values),
             },
+            'storage_technologies': self.techs,
             'storage_capacities': {
                 tech: {
                     'unit': 'kWh',
                     'value': float(self.model.variables[f'{tech}_capacity'].solution.values),
                 } for tech in self.techs
-            },
-            'selected_technologies': {
-                tech: bool(self.model.variables['technology_selection'].solution.values[i]) for i,tech in enumerate(self.techs)
             }
         }
 
@@ -301,7 +296,11 @@ class EnergyModel():
 
         return design_dict, overall_objective_dict, scenario_objective_contributions_dict
 
-    def save_scenarios(self, dir):
-        """Save scenario data to yaml files."""
+    def save_scenarios(self, dir: str):
+        """Save scenario data to yaml files.
+
+        Args:
+            dir (str): Path to directory to save scenario files.
+        """
         for m,scenario in enumerate(self.scenarios):
             scenario.to_file(os.path.join(dir,f'scenario_{m}.yaml'))

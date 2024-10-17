@@ -41,11 +41,11 @@ class ScenarioData:
         self.carbon_year = ts_dict['carbon_year']
 
         self.storage_technologies = sorted(list(storage_dict.keys()))
-        self.storage_costs = [storage_dict[tech]['cost'] for tech in self.storage_technologies]
-        self.storage_lifetimes = [storage_dict[tech]['lifetime'] for tech in self.storage_technologies]
-        self.storage_efficiencies = [storage_dict[tech]['efficiency'] for tech in self.storage_technologies]
-        self.discharge_ratios = [storage_dict[tech]['discharge_ratio'] for tech in self.storage_technologies]
-        self.depths_of_discharge = [storage_dict[tech]['depth_of_discharge'] for tech in self.storage_technologies]
+        self.storage_costs = {tech: storage_dict[tech]['cost'] for tech in self.storage_technologies}
+        self.storage_lifetimes = {tech: storage_dict[tech]['lifetime'] for tech in self.storage_technologies}
+        self.storage_efficiencies = {tech: storage_dict[tech]['efficiency'] for tech in self.storage_technologies}
+        self.discharge_ratios = {tech: storage_dict[tech]['discharge_ratio'] for tech in self.storage_technologies}
+        self.depths_of_discharge = {tech: storage_dict[tech]['depth_of_discharge'] for tech in self.storage_technologies}
 
     def __str__(self):
 

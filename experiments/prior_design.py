@@ -1,9 +1,9 @@
-# Perform initial design of system using prior samples
+"""Perform initial design of system using prior samples."""
 
 import os
 import sys
 
-from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, solve_model
+from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, try_all_designs
 from configs import get_experiment_config
 
 
@@ -24,6 +24,6 @@ if __name__ == "__main__":
 
     # Perform design
     print(f"Starting prior design @ {get_current_time()}")
-    solved_model = solve_model(prior_scenarios, settings)
-    solved_model.save_results(os.path.join(*settings['results_dir'],'prior','design.yaml'))
+    best_model = try_all_designs(prior_scenarios, settings, save_all=True)
+    best_model.save_results(os.path.join(*settings['results_dir'],'prior','best_design.yaml'))
     print(f"Finished prior design @ {get_current_time()}")

@@ -1,4 +1,4 @@
-# Perform posterior design of system for each scenario samples from prior
+"""Perform posterior design of system for each scenario samples from prior."""
 
 import os
 import sys
@@ -9,7 +9,7 @@ from tqdm import tqdm
 import multiprocess as mp
 from functools import partial
 
-from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, solve_model
+from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, solve_model, try_all_designs
 from configs import get_experiment_config
 
 
@@ -36,14 +36,13 @@ def posterior_design(measured_scenario_id, settings, restricted_tech):
 
         # load storage technologies selected in prior design
         with open(os.path.join(*settings['results_dir'],'prior','design.yaml'), 'r') as f: prior_design = yaml.safe_load(f)
-        selected_technologies = [k for k,v in prior_design['design']['selected_technologies'].items() if v]
-        settings['model_settings']['technologies_to_use'] = selected_technologies # update model settings
+        settings['model_settings']['storage_technologies'] = prior_design['design']['storage_technologies'] # update model settings
 
         # check if unrestricted design used prior selected technologies
         open_design_file = os.path.join(save_dir,f'open_design.yaml')
         if os.path.isfile(open_design_file):
             with open(open_design_file, 'r') as f: open_design = yaml.safe_load(f)
-            if open_design['design']['selected_technologies'] == prior_design['design']['selected_technologies']:
+            if open_design['design']['storage_technologies'] == prior_design['design']['storage_technologies']:
                 # skip computation of restriction design, as same as open design
                 print(f"Skipping restricted design for scenario {measured_scenario_id} as open design used prior selected technologies")
                 shutil.copy(open_design_file, os.path.join(save_dir,f'restricted_design.yaml'))
@@ -51,7 +50,10 @@ def posterior_design(measured_scenario_id, settings, restricted_tech):
 
     # Perform design
     print(f"Starting posterior {design_name} for scenario {measured_scenario_id} @ {get_current_time()}")
-    solved_model = solve_model(posterior_scenarios, settings)
+    if not restricted_tech:
+        solved_model = try_all_designs(posterior_scenarios, settings, save_all=False)
+    elif restricted_tech:
+        solved_model = solve_model(posterior_scenarios, settings)
     solved_model.save_results(os.path.join(save_dir,f'{design_name}.yaml'))
     print(f"Finished posterior {design_name} for scenario {measured_scenario_id} @ {get_current_time()}")
 
