@@ -86,7 +86,7 @@ def posterior_model(z_scenario, prob_settings, n_samples=64):
                 'reduction_factor':prob_settings['measurement_sigma_reduction'],
                 'z':storage_dict[tech][key]
             }
-            inits = {'theta':prob_settings[tech][key][0]}
+            inits = {'theta':prob_settings['storage'][tech][key][0]}
 
             posterior_fit = stan_model.sample(
                     data=data,
