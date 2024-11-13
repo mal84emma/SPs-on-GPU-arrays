@@ -14,7 +14,14 @@ from configs import get_experiment_config
 
 
 
-def posterior_design(measured_scenario_id, settings):
+def posterior_design(measured_scenario_id:int, settings:dict) -> None:
+    """Perform posterior design of system for specified measurement scenario
+    (given by id).
+
+    Args:
+        measured_scenario_id (int): ID of measurement scenario to use.
+        settings (dict): Dictionary of settings to use for model.
+    """
 
     save_dir = os.path.join(*settings['results_dir'],'posterior',f'z_scenario_{measured_scenario_id}')
 
@@ -51,25 +58,22 @@ if __name__ == "__main__":
 
     # ========================================
 
-    # Run params
-    n_concurrent_designs = 4 # TODO: update based on memory usage
-    offset = 0
-    n_scenarios_to_do = prob_settings['n_posterior_samples']
-
-    # ========================================
-
     design_wrapper = partial(
         posterior_design,
         settings=settings
     )
 
-    scenarios_to_design = list(range(offset,n_scenarios_to_do+offset))
+    scenarios_to_design = list(range(prob_settings['n_posterior_samples']))
 
     if scenario_id is not None: # scenario from command line (for script batching)
         design_result = design_wrapper(scenario_id)
+
     else:
-        if n_concurrent_designs > 1: # parallel processing
-            with mp.Pool(n_concurrent_designs) as pool:
+        with open(os.path.join('configs','base_settings.yaml'), 'r') as f:
+            machine_settings = yaml.safe_load(f)
+
+        if machine_settings['n_concurrent_designs'] > 1: # parallel processing
+            with mp.Pool(machine_settings['n_concurrent_designs']) as pool:
                 design_results = list(tqdm(pool.imap(design_wrapper, scenarios_to_design), total=len(scenarios_to_design)))
         else: # serial processing
             design_results = [design_wrapper(t) for t in tqdm(scenarios_to_design)]
