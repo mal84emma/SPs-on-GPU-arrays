@@ -22,8 +22,19 @@ class EnergyModel():
             self,
             scenarios: Iterable[ScenarioData],
             settings: dict
-    ):
-        """ToDo"""
+    ) -> Model:
+        """Construct LP (scenario program) model of energy park, using
+        specified list of scenarios and setting dictionary.
+
+        Args:
+            scenarios (Iterable[ScenarioData]): List of ScenarioData objects
+                defining scenarios to include in SP.
+            settings (dict): Dictionary of model settings. (`model_settings`
+                from `settings.yaml`)
+
+        Returns:
+            (Model): LP model object with set constraints and objective.
+        """
 
         ## Setup: data validation & formatting
         ## ===================================

@@ -6,6 +6,7 @@ import copy
 import numpy as np
 from scipy.stats import norm, truncnorm
 from cmdstanpy import CmdStanModel
+from typing import Tuple, Iterable
 
 # Turn off Stan logging
 import logging
@@ -17,15 +18,37 @@ logger.setLevel(logging.WARNING)
 from utils.data_handling import ScenarioData
 
 
-def truncnorm_sample(mu, sigma, lower=-2, upper=2):
+def truncnorm_sample(mu:float, sigma:float, lower=-2.0, upper=2.0) -> np.array:
     """Sample from a truncated normal distribution.
-    Default with \pm 2 standard deviations."""
+    Default truncation is \pm 2 standard deviations.
+
+    Args:
+        mu (float): Mean of the distribution.
+        sigma (float): Standard deviation of the distribution.
+        lower (float, optional): Lower cutoff (no. of sigma). Defaults to -2.0.
+        upper (float, optional): Upper cutoff (no. of sigma). Defaults to 2.0.
+
+    Returns:
+        np.array: Samples of random variable.
+    """
     return truncnorm.rvs(lower, upper, loc=mu, scale=sigma)
 
 
-def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, n_samples=64):
-    """TODO: perform sampling and return list of ScenarioData objects for
-    thetas and zs."""
+def prior_model(prob_settings:dict, base_cost_dict:dict, base_ts_dict:dict, base_storage_dict:dict,
+                n_samples:int=64) -> Tuple[Iterable[ScenarioData], Iterable[ScenarioData]]:
+    """Sample thetas and zs from prior distribution. Output as lists of ScenarioData objects
+
+    Args:
+        prob_settings (dict): Dictionary of probability settings defining distributions.
+            (`probability_settings` from `settings.yaml`)
+        base_cost_dict (dict): Template dictionary of cost values.
+        base_ts_dict (dict): Template dictionary of time series values.
+        base_storage_dict (dict): Template dictionary of storage values.
+        n_samples (int, optional): Number of scenarios to draw from prior. Defaults to 64.
+
+    Returns:
+        Tuple[Iterable[ScenarioData], Iterable[ScenarioData]]: Lists of theta and z scenarios.
+    """
 
     assert all([key in prob_settings['storage'].keys() for key in base_storage_dict.keys()]), "Must provide probability settings for all storage technologies."
 
@@ -65,9 +88,18 @@ def prior_model(prob_settings, base_cost_dict, base_ts_dict, base_storage_dict, 
     return theta_scenarios, z_scenarios
 
 
-def posterior_model(z_scenario, prob_settings, n_samples=64):
-    """TODO: take in scenario defining measurement values, sample from posterior,
-    and return list of ScenarioData objects for varthetas."""
+def posterior_model(z_scenario:ScenarioData, prob_settings:dict,
+                    n_samples:int=64) -> Iterable[ScenarioData]:
+    """Sample vartheta scenarios from posterior distribution given a scenario z.
+
+    Args:
+        z_scenario (ScenarioData): Measured scenario to condition on.
+        prob_settings (dict): Dictionary of probability settings defining distribution.
+        n_samples (int, optional): Number of scenarios to draw from posterior. Defaults to 64.
+
+    Returns:
+        Iterable[ScenarioData]: List of vartheta scenarios.
+    """
 
     ts_dict, cost_dict, storage_dict = z_scenario.to_file(None, save=False)
 
