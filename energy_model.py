@@ -3,6 +3,7 @@
 
 import os
 import yaml
+import time
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -188,11 +189,15 @@ class EnergyModel():
     def solve(self, **kwargs):
         """Solve constructed model and report corrected objective value."""
 
+        start_time = time.time()
+
         # ToDo arg parsing for solvers
         self.model.solve(**kwargs)
 
         load_elec_cost = self.scenario_weightings @ [self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T] for m in range(self.M)]
         self.corrected_objective = self.model.objective.value + load_elec_cost
+
+        self.solve_time = time.time() - start_time
 
         return self.corrected_objective
 
@@ -254,6 +259,13 @@ class EnergyModel():
             Tuple[Dict]: Dictionaries of design, overall objective, and scenario objective contributions.
         """
 
+        solve_stats_dict = {
+            'solve_time': {
+                'unit': 's',
+                'value': self.solve_time
+            }
+        }
+
         design_dict = {
             'wind_capacity': {
                 'unit': 'kW',
@@ -300,12 +312,13 @@ class EnergyModel():
 
         with open(fpath, 'w') as f:
             yaml.dump({
+                'solve_stats': solve_stats_dict,
                 'design': design_dict,
                 'overall_objective': overall_objective_dict,
                 'scenario_objective_contributions': scenario_objective_contributions_dict
             }, f, sort_keys=False)
 
-        return design_dict, overall_objective_dict, scenario_objective_contributions_dict
+        return solve_stats_dict, design_dict, overall_objective_dict, scenario_objective_contributions_dict
 
     def save_scenarios(self, dir: str):
         """Save scenario data to yaml files.
