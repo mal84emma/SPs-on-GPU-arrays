@@ -3,9 +3,12 @@
 results_dir: [results, test]
 
 solver_settings:
-  verbose: False
-  threads: 1 # no. Gurobi threads
+  verbose: True
+  threads: 4 # no. Gurobi threads
+
+model_settings:
+  N_technologies: 2
 
 probability_settings:
-  n_prior_samples: 3
-  n_posterior_samples: 3
+  n_prior_samples: 50
+  n_posterior_samples: 1

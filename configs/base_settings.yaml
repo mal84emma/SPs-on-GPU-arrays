@@ -2,7 +2,7 @@
 
 # Directories and file patterns
 dataset_dir: [data, processed]
-results_dir: [results]
+results_dir: [results, base]
 
 # Available years of data
 wind_years: &wind_years [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
@@ -33,8 +33,8 @@ solver_settings:
 
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]
-  n_prior_samples: 64
-  n_posterior_samples: 64
+  n_prior_samples: 100
+  n_posterior_samples: 50
   sampling_thin_factor: 10
   measurement_sigma_reduction: 0.25 # TODO: confirm
   load_level: [250000,25000]
