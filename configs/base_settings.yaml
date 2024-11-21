@@ -29,7 +29,8 @@ model_settings:
 
 # Default solver settings
 solver_settings:
-  verbose: False
+  verbose: True
+  threads: 4 # no. Gurobi threads
 
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]
