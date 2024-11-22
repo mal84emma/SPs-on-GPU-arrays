@@ -49,7 +49,7 @@ class ScenarioData:
 
     def __str__(self):
 
-        ts_dict, cost_dict, storage_dict = self.to_file(None, save=False)
+        cost_dict, ts_dict, storage_dict = self.to_file(None, save=False)
 
         str = ''
         str += 'Scenario Data\n'
