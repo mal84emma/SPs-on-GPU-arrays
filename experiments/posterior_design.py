@@ -39,7 +39,7 @@ def posterior_design(measured_scenario_id:int, settings:dict) -> None:
     best_model.save_results(os.path.join(save_dir,f'open_design.yaml'))
 
     # Save design with prior selected technologies as restricted design
-    with open(os.path.join(*settings['results_dir'],'prior','design.yaml'), 'r') as f: prior_design = yaml.safe_load(f)
+    with open(os.path.join(*settings['results_dir'],'prior','best_design.yaml'), 'r') as f: prior_design = yaml.safe_load(f)
     prior_techs_str = '-'.join(prior_design['design']['storage_technologies'])
     target_file = os.path.join(save_dir,'design_options',f'{prior_techs_str}_design.yaml')
     shutil.copy(target_file, os.path.join(save_dir,f'restricted_design.yaml'))
