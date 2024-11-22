@@ -12,7 +12,8 @@ from energy_model import EnergyModel
 
 def solve_model(
         scenarios: List[ScenarioData],
-        settings: Dict
+        settings: Dict,
+        set_design: Dict = None
     ) -> EnergyModel:
     """Construct Scenario Programming model of system specified by settings
     with passed scenarios, and solve.
@@ -22,6 +23,8 @@ def solve_model(
             time series data to use in Scenario Programming model.
         settings (Dict): Dictionary of settings used to construct model.
             See configs/base_settings.yaml for required keys.
+        set_design (Dict, optional): Dictionary specifying system design to
+            run optimization in operational mode. Defaults to None.
 
     Returns:
         EnergyModel: Optimised model object.
@@ -54,7 +57,7 @@ def solve_model(
             scenario.load_timeseries(os.path.join(*settings['dataset_dir']))
 
         # Generate and solve model
-        model.generate_SP(scenarios, settings['model_settings'])
+        model.generate_SP(scenarios, settings['model_settings'], set_design)
         model.solve(**solver_kwargs)
 
     return model

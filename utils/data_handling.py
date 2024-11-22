@@ -55,14 +55,14 @@ class ScenarioData:
         str += 'Scenario Data\n'
         str += '=============\n'
 
-        str += 'Time Series Data\n'
-        str += '----------------\n'
-        for key, val in ts_dict.items():
-            str += f'{key}: {val}\n'
-
         str += '\nCost Data\n'
         str += '---------\n'
         for key, val in cost_dict.items():
+            str += f'{key}: {val}\n'
+
+        str += '\nTime Series Data\n'
+        str += '----------------\n'
+        for key, val in ts_dict.items():
             str += f'{key}: {val}\n'
 
         str += '\nStorage Data\n'

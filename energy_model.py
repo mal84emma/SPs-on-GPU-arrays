@@ -22,7 +22,8 @@ class EnergyModel():
     def generate_SP(
             self,
             scenarios: Iterable[ScenarioData],
-            settings: dict
+            settings: Dict,
+            set_design: Dict = None
     ) -> Model:
         """Construct LP (scenario program) model of energy park, using
         specified list of scenarios and setting dictionary.
@@ -30,8 +31,10 @@ class EnergyModel():
         Args:
             scenarios (Iterable[ScenarioData]): List of ScenarioData objects
                 defining scenarios to include in SP.
-            settings (dict): Dictionary of model settings. (`model_settings`
+            settings (Dict): Dictionary of model settings. (`model_settings`
                 from `settings.yaml`)
+            set_design (Dict, optional): Dictionary specifying system design to
+                run optimization in operational mode. Defaults to None.
 
         Returns:
             (Model): LP model object with set constraints and objective.
@@ -69,6 +72,10 @@ class EnergyModel():
         self.alpha = settings['CVaR_alpha'] # confidence level
         self.beta = settings['CVaR_beta'] # risk aversion parameter
 
+        if set_design is not None:
+            assert all([key in set_design for key in ['wind_capacity','solar_capacity']]), "Design dict must contain keys 'wind_capacity' and 'solar_capacity'."
+            assert set_design['storage_technologies'] == self.techs, "Storage technologies in set_design must match those in settings."
+
         self.scenarios = scenarios
         self.M = len(scenarios) # number of scenarios
 
@@ -89,7 +96,13 @@ class EnergyModel():
         solar_capacity = self.model.add_variables(lower=0, name='solar_capacity')
         storage_capacities = {tech: self.model.add_variables(lower=0, name=f'{tech}_capacity') for tech in self.techs}
 
-        self.model.add_constraints(solar_capacity, '<=', self.solar_capacity_limit, name='solar_capacity_limit')
+        if set_design is None:
+            self.model.add_constraints(solar_capacity, '<=', self.solar_capacity_limit, name='solar_capacity_limit')
+        else: # set capacity variables to specified design values
+            self.model.add_constraints(solar_capacity, '=', set_design['solar_capacity']['value'], name='solar_capacity')
+            self.model.add_constraints(wind_capacity, '=', set_design['wind_capacity']['value'], name='wind_capacity')
+            for tech in self.techs:
+                self.model.add_constraints(storage_capacities[tech], '=', set_design['storage_capacities'][tech]['value'], name=f'{tech}_capacity')
 
         # access objects
         self.scen_obj_contrs = {}
@@ -207,7 +220,7 @@ class EnergyModel():
         need for +ve & -ve storage flow means model allows this
         this is also done in PyPSA https://github.com/PyPSA/PyPSA/blob/master/test/test_lopf_basic_constraints.py#L22"""
 
-        self.energy_flares = {}
+        self.energy_flares = {f's{m}': {} for m in range(self.M)}
 
         for m in range(self.M):
             total_dumped = 0
@@ -221,32 +234,39 @@ class EnergyModel():
                 net_energy_in = Ein_dumps - Eout_dumps
                 net_energy_gain = np.sqrt(eta)*Ein_dumps - 1/np.sqrt(eta)*Eout_dumps
                 dumped_energy = net_energy_in - net_energy_gain
+
+                self.energy_flares[f's{m}'][tech] = dumped_energy
                 total_dumped += dumped_energy
 
-            self.energy_flares[f's{m}'] = {
-                'energy_dump': total_dumped,
+            self.energy_flares[f's{m}'].update({
+                'total_energy_dump': total_dumped,
                 'generation_curtailment': self.model.variables[f'generation_curtailment_s{m}'].solution
-            }
+            })
 
         return self.energy_flares
 
 
-    def get_battery_cycles(self):
+    def get_storage_cycles(self):
         """ToDo ... check battery cycling"""
 
-        self.battery_cycles = {}
+        self.storage_cycles = {}
 
         for m in range(self.M):
-            self.battery_cycles[f's{m}'] = {}
+            self.storage_cycles[f's{m}'] = {}
             for tech in self.techs:
                 if self.model.variables[f'{tech}_capacity'].solution > 0:
-                    charged_energy = getattr(self.model.variables,f'Ein_{tech}_s{m}').solution.sum()
-                    discharged_energy = getattr(self.model.variables,f'Eout_{tech}_s{m}').solution.sum()
-                    total_energy_flow = charged_energy + discharged_energy
-                    num_cycles = total_energy_flow.values / (2*self.model.variables[f'{tech}_capacity'].solution.values)
-                    self.battery_cycles[f's{m}'][tech] = num_cycles
+                    # ein = getattr(self.model.variables,f'Ein_{tech}_s{m}').solution
+                    # eout = getattr(self.model.variables,f'Eout_{tech}_s{m}').solution
+                    # total_energy_flow = np.sum(np.abs(ein - eout))
+                    SOC = getattr(self.model.variables,f'SOC_{tech}_s{m}').solution
+                    energy_deltas = np.diff(SOC)
+                    total_energy_flow = np.sum(np.abs(energy_deltas))
 
-        return self.battery_cycles
+                    num_cycles = total_energy_flow / (2*self.model.variables[f'{tech}_capacity'].solution.values)
+                    # NOTE: not correcting for depth of discharge here
+                    self.storage_cycles[f's{m}'][tech] = num_cycles
+
+        return self.storage_cycles
 
 
     def save_results(self, fpath: str) -> Tuple[Dict]:
