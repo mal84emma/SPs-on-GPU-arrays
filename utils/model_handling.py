@@ -38,6 +38,10 @@ def solve_model(
     else: solver_kwargs = {'solver_name': 'highs'}
     solver_kwargs['io_api'] = 'direct' # default is 'lp', but 'direct' is faster and doesn't print to console
 
+    time_limit = settings['solver_settings'].get('time_limit', None)
+    if time_limit is not None: # alternatively could set OptimalityTol
+        solver_kwargs['TimeLimit'] = float(time_limit)
+
     # Setup up model and solve
     model = EnergyModel()
 
@@ -45,9 +49,11 @@ def solve_model(
         # filter pandas warnings, `DeprecationWarning: np.find_common_type is deprecated.`
         warnings.simplefilter("ignore", category=FutureWarning)
 
+        # Load time series data
         for scenario in scenarios:
             scenario.load_timeseries(os.path.join(*settings['dataset_dir']))
 
+        # Generate and solve model
         model.generate_SP(scenarios, settings['model_settings'])
         model.solve(**solver_kwargs)
 

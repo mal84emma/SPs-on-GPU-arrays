@@ -82,7 +82,7 @@ class EnergyModel():
 
         ## Construct model
         ## ===============
-        self.model = Model(force_dim_names=True)
+        self.model: Model = Model(force_dim_names=True)
 
         ## Capacity variables
         wind_capacity = self.model.add_variables(lower=0, name='wind_capacity')
@@ -197,7 +197,7 @@ class EnergyModel():
         load_elec_cost = self.scenario_weightings @ [self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T] for m in range(self.M)]
         self.corrected_objective = self.model.objective.value + load_elec_cost
 
-        self.solve_time = time.time() - start_time
+        self.run_time = time.time() - start_time
 
         return self.corrected_objective
 
@@ -260,10 +260,12 @@ class EnergyModel():
         """
 
         solve_stats_dict = {
-            'solve_time': {
+            'termination_condition': self.model.termination_condition,
+            'run_time': {
                 'unit': 's',
-                'value': self.solve_time
+                'value': self.run_time
             }
+            # TODO: can I get more solution stats? e.g. optimality gap, constraint violations, etc.
         }
 
         design_dict = {

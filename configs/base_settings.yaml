@@ -31,6 +31,7 @@ model_settings:
 solver_settings:
   verbose: True
   threads: 4 # no. Gurobi threads
+  time_limit: 10260 # (s), 3hrs with 5% buffer
 
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]

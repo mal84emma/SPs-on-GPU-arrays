@@ -13,7 +13,7 @@ def get_experiment_config(expt_id):
     elif expt_id == -1:
         expt_name = 'test_settings'
     elif expt_id == 1:
-        expt_name = 'two_tech_settings'
+        expt_name = 'two_techs_settings'
     elif expt_id == 2:
         ... # etc.
     else:
