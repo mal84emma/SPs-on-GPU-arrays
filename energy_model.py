@@ -66,11 +66,12 @@ class EnergyModel():
         self.capex_budget = settings['capex_budget'] # maximum capital expenditure (€, annualised)
 
         assert type(settings['use_CVaR']) == bool, "use_CVaR must be a boolean."
-        assert 0 < settings['CVaR_alpha'] < 0.5, "CVaR_alpha must be between 0 and 0.5."
-        assert settings['CVaR_beta'] > 0, "CVaR_beta must be positive."
         self.use_CVaR = settings['use_CVaR'] # use Conditional Value at Risk in objective
-        self.alpha = settings['CVaR_alpha'] # confidence level
-        self.beta = settings['CVaR_beta'] # risk aversion parameter
+        if self.use_CVaR:
+            assert 0 < settings['CVaR_alpha'] < 0.5, "CVaR_alpha must be between 0 and 0.5."
+            assert settings['CVaR_beta'] > 0, "CVaR_beta must be positive."
+            self.alpha = settings['CVaR_alpha'] # confidence level
+            self.beta = settings['CVaR_beta'] # risk aversion parameter
 
         if set_design is not None:
             assert all([key in set_design for key in ['wind_capacity','solar_capacity']]), "Design dict must contain keys 'wind_capacity' and 'solar_capacity'."

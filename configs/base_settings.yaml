@@ -24,8 +24,6 @@ model_settings:
   N_technologies: 1
   allow_elec_purchase: True
   use_CVaR: False
-  CVaR_alpha: 0.1 # TODO: confirm
-  CVaR_beta: 1 # TODO: confirm
 
 # Default solver settings
 solver_settings:
@@ -38,7 +36,7 @@ probability_settings: # tuples are [mu,sigma]
   n_prior_samples: 100
   n_posterior_samples: 50
   sampling_thin_factor: 10
-  measurement_sigma_reduction: 0.25 # TODO: confirm
+  measurement_sigma_reduction: 0.25
   load_level: [250000,25000]
   wind_years: *wind_years
   solar_years: *solar_years

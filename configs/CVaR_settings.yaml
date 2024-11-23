@@ -1,8 +1,8 @@
 # Model settings for experiments with CVaR in objective
 
-results_dir: [results, CVaR_...]
+results_dir: [results, CVaR]
 
 model_settings:
   use_CVaR: False
-  alpha: ...
-  beta: ...
+  CVaR_alpha: 0.1
+  CVaR_beta: 1
