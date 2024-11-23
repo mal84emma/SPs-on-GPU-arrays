@@ -2,6 +2,7 @@
 
 import os
 import sys
+import shutil
 
 from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, try_all_designs
 from configs import get_experiment_config
@@ -24,6 +25,7 @@ if __name__ == "__main__":
 
     # Perform design
     print(f"Starting prior design @ {get_current_time()}")
-    best_model = try_all_designs(prior_scenarios, settings, save_all=os.path.join(*settings['results_dir'],'prior'))
-    best_model.save_results(os.path.join(*settings['results_dir'],'prior','best_design.yaml'))
+    save_dir = os.path.join(*settings['results_dir'],'prior')
+    best_techs = try_all_designs(prior_scenarios, settings, save_all=save_dir)
+    shutil.copy(os.path.join(save_dir,f'{best_techs}_design.yaml'),os.path.join(save_dir,f'best_design.yaml'))
     print(f"Finished prior design @ {get_current_time()}")

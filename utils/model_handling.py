@@ -81,13 +81,13 @@ def try_all_designs(
             combinations to file. Not saved to file if `None`. Defaults to None.
 
     Returns:
-        EnergyModel: Optimised model object with best storage combination.
+        str: Combination of storage technologies with lowest optimised cost.
     """
 
     available_technologies = list(settings['probability_settings']['storage'].keys())
 
     best_objective = float('inf')
-    best_model = None
+    best_techs = None
 
     for techs in itertools.combinations(available_technologies, settings['model_settings']['N_technologies']):
         settings['model_settings']['storage_technologies'] = list(techs)
@@ -102,6 +102,8 @@ def try_all_designs(
 
         if solved_model.corrected_objective < best_objective:
             best_objective = solved_model.corrected_objective
-            best_model = solved_model
+            best_techs = techs_str
 
-    return best_model
+        del solved_model # free up memory
+
+    return best_techs

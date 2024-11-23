@@ -35,14 +35,13 @@ def posterior_design(measured_scenario_id:int, settings:dict) -> None:
 
     print(f"Starting posterior design for scenario {measured_scenario_id} @ {get_current_time()}")
     # Perform design (trying all tech combos) & save unrestricted design
-    best_model = try_all_designs(posterior_scenarios, settings, save_all=os.path.join(save_dir,'design_options'))
-    best_model.save_results(os.path.join(save_dir,f'open_design.yaml'))
+    best_techs = try_all_designs(posterior_scenarios, settings, save_all=os.path.join(save_dir,'design_options'))
+    shutil.copy(os.path.join(save_dir,'design_options',f'{best_techs}_design.yaml'),os.path.join(save_dir,f'open_design.yaml'))
 
     # Save design with prior selected technologies as restricted design
     with open(os.path.join(*settings['results_dir'],'prior','best_design.yaml'), 'r') as f: prior_design = yaml.safe_load(f)
     prior_techs_str = '-'.join(prior_design['design']['storage_technologies'])
-    target_file = os.path.join(save_dir,'design_options',f'{prior_techs_str}_design.yaml')
-    shutil.copy(target_file, os.path.join(save_dir,f'restricted_design.yaml'))
+    shutil.copy(os.path.join(save_dir,'design_options',f'{prior_techs_str}_design.yaml'),os.path.join(save_dir,f'restricted_design.yaml'))
 
     print(f"Finished posterior design for scenario {measured_scenario_id} @ {get_current_time()}")
 
