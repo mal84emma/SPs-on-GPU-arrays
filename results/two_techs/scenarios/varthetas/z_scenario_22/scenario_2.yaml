@@ -1,0 +1,43 @@
+cost_values:
+  wind_capex: 5000.0
+  wind_opex: 100
+  wind_lifetime: 20
+  solar_capex: 1000.0
+  solar_opex: 10
+  solar_lifetime: 20
+  carbon_price: 1.0
+timeseries_values:
+  load_level: 265099.57624196995
+  wind_year: 2014
+  solar_year: 2015
+  price_year: 2023
+  carbon_year: 2023
+storage_values:
+  CAES:
+    cost: 50.5019
+    lifetime: 21.1542
+    annual_cost: 2.3873226120581257
+    efficiency: 0.600027
+    discharge_ratio: 0.1
+    depth_of_discharge: 0.4
+  Li-ion:
+    cost: 134.98
+    lifetime: 16.2346
+    annual_cost: 8.3143409754475
+    efficiency: 0.92281
+    discharge_ratio: 2
+    depth_of_discharge: 0.9
+  Pb-acid:
+    cost: 71.5091
+    lifetime: 9.17069
+    annual_cost: 7.797570302779834
+    efficiency: 0.709594
+    discharge_ratio: 5
+    depth_of_discharge: 0.5
+  VRBF:
+    cost: 384.479
+    lifetime: 15.0982
+    annual_cost: 25.465221019724204
+    efficiency: 0.681942
+    discharge_ratio: 0.5
+    depth_of_discharge: 1.0
