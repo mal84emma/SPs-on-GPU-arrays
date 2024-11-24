@@ -3,8 +3,9 @@
 import os
 import sys
 import shutil
+import itertools
 
-from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, try_all_designs
+from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, try_all_designs, solve_model
 from configs import get_experiment_config
 
 
@@ -13,6 +14,14 @@ if __name__ == "__main__":
     expt_id = int(sys.argv[1])
     settings, base_params = get_experiment_config(expt_id)
     prob_settings = settings['probability_settings']
+
+    if len(sys.argv) > 2:
+        tech_combo_ind = int(sys.argv[2])
+        available_technologies = list(settings['probability_settings']['storage'].keys())
+        combos = itertools.combinations(available_technologies, settings['model_settings']['N_technologies'])
+        tech_combo = combos[tech_combo_ind]
+    else:
+        tech_combo = None
 
     # ========================================
 
@@ -24,8 +33,16 @@ if __name__ == "__main__":
     settings['solver_settings']['env'] = get_Gurobi_WLS_env(silence = not settings['solver_settings']['verbose'])
 
     # Perform design
-    print(f"Starting prior design @ {get_current_time()}")
     save_dir = os.path.join(*settings['results_dir'],'prior')
-    best_techs = try_all_designs(prior_scenarios, settings, save_all=save_dir)
-    shutil.copy(os.path.join(save_dir,f'{best_techs}_design.yaml'),os.path.join(save_dir,f'best_design.yaml'))
-    print(f"Finished prior design @ {get_current_time()}")
+
+    if tech_combo is None: # do design for all technology combinations together
+        print(f"Starting prior design @ {get_current_time()}")
+        best_techs = try_all_designs(prior_scenarios, settings, save_all=save_dir)
+        shutil.copy(os.path.join(save_dir,f'{best_techs}_design.yaml'),os.path.join(save_dir,f'best_design.yaml'))
+        print(f"Finished prior design @ {get_current_time()}")
+    else: # just evaluate selected technology combination
+        print(f"Starting prior design for tech combo {tech_combo} @ {get_current_time()}")
+        settings['model_settings']['storage_technologies'] = list(tech_combo)
+        solved_model = solve_model(prior_scenarios, settings)
+        solved_model.save_results(os.path.join(save_dir,f'{'-'.join(tech_combo)}_design.yaml'))
+        print(f"Finished prior design for tech combo {tech_combo} @ {get_current_time()}")

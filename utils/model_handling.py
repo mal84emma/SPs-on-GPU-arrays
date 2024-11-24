@@ -39,7 +39,8 @@ def solve_model(
             'Threads':settings['solver_settings'].get('threads',0)
         }
     else: solver_kwargs = {'solver_name': 'highs'}
-    solver_kwargs['io_api'] = 'direct' # default is 'lp', but 'direct' is faster and doesn't print to console
+    solver_kwargs['io_api'] = 'lp'
+    # default is 'lp', but 'direct' is faster and doesn't print to console; use 'lp' for progress viz
 
     time_limit = settings['solver_settings'].get('time_limit', None)
     if time_limit is not None: # alternatively could set OptimalityTol
