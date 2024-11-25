@@ -68,7 +68,7 @@ if __name__ == "__main__":
         design_result = design_wrapper(scenario_id)
 
     else:
-        with open(os.path.join('configs','base_settings.yaml'), 'r') as f:
+        with open(os.path.join('configs','machine_settings.yaml'), 'r') as f:
             machine_settings = yaml.safe_load(f)
 
         if machine_settings['n_concurrent_designs'] > 1: # parallel processing
