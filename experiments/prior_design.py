@@ -2,19 +2,27 @@
 
 import os
 import sys
+import yaml
 import shutil
 import itertools
 
-from utils import ScenarioData, get_current_time, get_Gurobi_WLS_env, try_all_designs, solve_model
+from utils import ScenarioData, update_nested_dict, get_current_time, get_Gurobi_WLS_env, try_all_designs, solve_model
 from configs import get_experiment_config
 
 
 if __name__ == "__main__":
 
+    # Get experiment settings
     expt_id = int(sys.argv[1])
     settings, base_params = get_experiment_config(expt_id)
     prob_settings = settings['probability_settings']
 
+    # Update solver settings for prior (use more resources)
+    with open(os.path.join('configs','prior_override_settings.yaml'), 'r') as f:
+        prior_settings = yaml.safe_load(f)
+    settings = update_nested_dict(settings, prior_settings)
+
+    # Setup specified tech combo if CLarg passed
     if len(sys.argv) > 2:
         tech_combo_ind = int(sys.argv[2])
         available_technologies = list(settings['probability_settings']['storage'].keys())
