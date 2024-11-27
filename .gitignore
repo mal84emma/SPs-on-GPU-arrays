@@ -19,6 +19,9 @@ venv/
 # Temporary files
 temp*
 
+## Ignore scenario files (too many for git)
+scenarios/
+
 ## Ignore complied files from Stan
 # Ignore all files in stan_models dir
 stan_models/*
@@ -29,3 +32,4 @@ stan_models/*
 logs
 slurm*
 machine.file*
+allocated.nodes
