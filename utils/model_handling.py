@@ -1,13 +1,83 @@
 """Helper functions for working with models."""
 
 import os
+import time
 import warnings
 import itertools
 
 from typing import List, Dict
+import numpy as np
 from utils import ScenarioData
+from scenarioReducer import Fast_forward
 from energy_model import EnergyModel
 
+
+def reduce_scenarios(
+        scenarios: List[ScenarioData],
+        settings: Dict
+    ) -> List[ScenarioData]:
+    """Reduce scenarios using Fast Forward algorithm, with indivudal
+    optimized costs as statistical metric, and :math:`L_2` distance.
+
+    Args:
+        scenarios (List[ScenarioData]): List of Scenario objects defining
+            time series data to use in Scenario Programming model.
+        settings (Dict): Dictionary of settings used to construct model.
+            See configs/base_settings.yaml for required keys.
+
+    Returns:
+        List[ScenarioData]: List of reduced scenarios (ScenarioData objects).
+    """
+
+    M = len(scenarios)
+    Nred = settings['probability_settings']['n_reduced_scenarios']
+
+    print(f"Reducing {M} scenarios to {Nred} using Fast Forward algorithm.")
+    start = time.time()
+
+    # get scenario probabilities
+    if all([scenario.probability is not None for scenario in scenarios]):
+        probs = np.array([scenario.probability for scenario in scenarios])
+        assert np.isclose(np.sum(probs), 1.0), f"Scenario weightings must sum to 1. Currently sum to {np.sum(probs)}"
+    else: # assume scenarios equally probable
+        probs = np.ones(M)/M
+
+    # evaluate optimized cost for each scenario
+    if (env := settings['solver_settings'].get('env', None)): # temporarily suppress Gurobi output
+        env.setParam('OutputFlag',0)
+
+    indiv_op_costs = []
+    for m,scenario in enumerate(scenarios):
+        model = solve_model([scenario], settings)
+        indiv_op_costs.append(model.corrected_objective)
+        print(f"Scenario {m} obj. ({time.time()-start:.1f}s): {model.corrected_objective}")
+    indiv_op_costs = np.array([indiv_op_costs]) # needs to be 2d np.array
+
+    # perform reduction using fast forward algorithm
+    FFreducer = Fast_forward(indiv_op_costs, probs)
+    reduced_scenario_stats, reduced_probs, reduced_indices = FFreducer.reduce(distance=2,n_scenarios=Nred)
+    # sort indices and probs by indices
+    reduced_probs = [prob for _,prob in sorted(zip(reduced_indices,reduced_probs))]
+    reduced_indices = sorted(reduced_indices)
+    print(reduced_scenario_stats)
+    print(reduced_indices)
+    print(reduced_probs)
+
+    # get reduced scenarios and assign probabilities and ids
+    reduced_scenarios = [scenarios[ind] for ind in reduced_indices]
+    for i in range(Nred):
+        reduced_scenarios[i].probability = reduced_probs[i]
+        reduced_scenarios[i].id = reduced_indices[i]
+
+    # report on scenario reduction
+    print(f"Scenarios reduced in {time.time()-start:.1f}s.")
+    print(f"Reduced scenarios: {reduced_indices}")
+    print(f"With probabilities: {reduced_probs}")
+
+    if (env := settings['solver_settings'].get('env', None)): # return verbose setting
+        env.setParam('OutputFlag',int(settings['solver_settings']['verbose']))
+
+    return reduced_scenarios
 
 
 def solve_model(
@@ -31,22 +101,29 @@ def solve_model(
     """
 
     # Set up solver kwargs
-    env = settings['solver_settings'].get('env', None)
-    if env is not None:
+    # ====================
+    if (env := settings['solver_settings'].get('env', None)):
         solver_kwargs = {
             'solver_name':'gurobi',
             'env':env,
             'Threads':settings['solver_settings'].get('threads',0)
         }
     else: solver_kwargs = {'solver_name': 'highs'}
-    solver_kwargs['io_api'] = 'lp'
-    # default is 'lp', but 'direct' is faster and doesn't print to console; use 'lp' for progress viz
+    solver_kwargs['io_api'] = 'direct' # default is 'lp', but 'direct' is faster and doesn't print to console
 
-    time_limit = settings['solver_settings'].get('time_limit', None)
-    if time_limit is not None: # alternatively could set OptimalityTol
-        solver_kwargs['TimeLimit'] = float(time_limit)
+    gurobi_options = ['TimeLimit','Crossover','CrossoverBasis','OptimalityTol']
+    # see https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html for Gurobi parameters
+    for key in gurobi_options:
+        if key in settings['solver_settings']:
+            solver_kwargs[key] = settings['solver_settings'][key]
+
+    # Peform scenario reduction if required
+    # =====================================
+    if len(scenarios) > settings['probability_settings']['n_reduced_scenarios']:
+        scenarios = reduce_scenarios(scenarios, settings)
 
     # Setup up model and solve
+    # ========================
     model = EnergyModel()
 
     with warnings.catch_warnings():

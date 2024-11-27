@@ -208,8 +208,8 @@ class EnergyModel():
         # ToDo arg parsing for solvers
         self.model.solve(**kwargs)
 
-        load_elec_cost = self.scenario_weightings @ [self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T] for m in range(self.M)]
-        self.corrected_objective = self.model.objective.value + load_elec_cost
+        self.load_elec_cost = self.scenario_weightings @ [self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T] for m in range(self.M)]
+        self.corrected_objective = self.model.objective.value + self.load_elec_cost
 
         self.run_time = time.time() - start_time
 
@@ -313,23 +313,23 @@ class EnergyModel():
             'overall_wind_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['wind'].solution.values for m in range(self.M)]),
             'overall_solar_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['solar'].solution.values for m in range(self.M)]),
             'overall_storage_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['storage'].solution.values for m in range(self.M)]),
-            'overall_elec_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['elec'].solution.values for m in range(self.M)]),
+            'overall_elec_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['elec'].solution.values for m in range(self.M)]) + float(self.load_elec_cost),
             'overall_carbon_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['carbon'].solution.values for m in range(self.M)])
         }
 
         scenario_objective_contributions_dict = {'units': 'Euros'}
         for m in range(self.M):
             id = self.scenarios[m].id or m
-            scenario_objective_contributions_dict.update({
-                    f'scenario_{id}': {
-                        'probability': float(self.scenario_weightings[m]),
-                        'wind_cost': float(self.scen_obj_contrs[m]['wind'].solution.values),
-                        'solar_cost': float(self.scen_obj_contrs[m]['solar'].solution.values),
-                        'storage_cost': float(self.scen_obj_contrs[m]['storage'].solution.values),
-                        'elec_cost': float(self.scen_obj_contrs[m]['elec'].solution.values),
-                        'carbon_cost': float(self.scen_obj_contrs[m]['carbon'].solution.values)
-                    }
-                })
+            scen_cost_dict = {
+                    'wind_cost': float(self.scen_obj_contrs[m]['wind'].solution.values),
+                    'solar_cost': float(self.scen_obj_contrs[m]['solar'].solution.values),
+                    'storage_cost': float(self.scen_obj_contrs[m]['storage'].solution.values),
+                    'elec_cost': float(self.scen_obj_contrs[m]['elec'].solution.values) + float(self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T]),
+                    'carbon_cost': float(self.scen_obj_contrs[m]['carbon'].solution.values)
+                }
+            scen_cost_dict['total_cost'] = sum(scen_cost_dict.values())
+            scen_cost_dict['probability'] = float(self.scenario_weightings[m])
+            scenario_objective_contributions_dict.update({f'scenario_{id}': scen_cost_dict})
 
 
         if os.path.dirname(fpath) != '':
