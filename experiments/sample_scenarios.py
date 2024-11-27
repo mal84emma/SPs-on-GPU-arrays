@@ -2,6 +2,7 @@
 
 import os
 import sys
+import time
 import numpy as np
 
 from configs import get_experiment_config
@@ -16,9 +17,11 @@ if __name__ == "__main__":
 
     # ========================================
 
+    start = time.time()
+
     # Sample from prior
     np.random.seed(42) # for reproducibility
-    save_dir = os.path.join(*settings['results_dir'],'scenarios')
+    save_dir = os.path.join(*settings['scenarios_dir'])
 
     theta_scenarios, z_scenarios = prior_model(
         prob_settings,
@@ -32,7 +35,7 @@ if __name__ == "__main__":
         theta_scenarios[i].to_file(os.path.join(save_dir,'thetas',f'scenario_{i}.yaml'))
         z_scenarios[i].to_file(os.path.join(save_dir,'zs',f'scenario_{i}.yaml'))
 
-    print("Thetas and zs sampled.")
+    print(f"Thetas and zs sampled. ({time.time()-start:.1f}s)")
 
     # Sample from posterior
     np.random.seed(42) # for reproducibility
@@ -48,4 +51,4 @@ if __name__ == "__main__":
         for j,scenario in enumerate(vartheta_scenarios):
             scenario.to_file(os.path.join(save_dir,f'z_scenario_{i}',f'scenario_{j}.yaml'))
 
-        print(f"z scenario {i} sampled.")
+        print(f"z scenario {i} sampled. ({time.time()-start:.1f}s)")

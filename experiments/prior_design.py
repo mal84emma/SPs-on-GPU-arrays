@@ -35,7 +35,7 @@ if __name__ == "__main__":
     # ========================================
 
     # Load prior samples
-    prior_scenarios_dir = os.path.join(*settings['results_dir'],'scenarios','thetas')
+    prior_scenarios_dir = os.path.join(*settings['scenarios_dir'],'thetas')
     prior_scenarios = [ScenarioData.from_file(os.path.join(prior_scenarios_dir,f'scenario_{i}.yaml')) for i in range(prob_settings['n_prior_samples'])]
 
     # Set up Gurobi environment

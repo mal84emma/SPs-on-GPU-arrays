@@ -29,7 +29,7 @@ def posterior_design(measured_scenario_id:int, settings:dict) -> None:
     settings['solver_settings']['env'] = get_Gurobi_WLS_env(silence = not settings['solver_settings']['verbose'])
 
     # Load posterior samples
-    posterior_scenarios_dir = os.path.join(*settings['results_dir'],'scenarios','varthetas')
+    posterior_scenarios_dir = os.path.join(*settings['scenarios_dir'],'varthetas')
     posterior_scenario_fpattern = os.path.join(posterior_scenarios_dir,f'z_scenario_{measured_scenario_id}','scenario_{j}.yaml')
     posterior_scenarios = [ScenarioData.from_file(posterior_scenario_fpattern.format(j=j)) for j in range(prob_settings['n_posterior_samples'])]
 
