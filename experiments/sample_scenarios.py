@@ -32,6 +32,8 @@ if __name__ == "__main__":
         theta_scenarios[i].to_file(os.path.join(save_dir,'thetas',f'scenario_{i}.yaml'))
         z_scenarios[i].to_file(os.path.join(save_dir,'zs',f'scenario_{i}.yaml'))
 
+    print("Thetas and zs sampled.")
+
     # Sample from posterior
     np.random.seed(42) # for reproducibility
     save_dir = os.path.join(save_dir,'varthetas')
@@ -45,3 +47,5 @@ if __name__ == "__main__":
 
         for j,scenario in enumerate(vartheta_scenarios):
             scenario.to_file(os.path.join(save_dir,f'z_scenario_{i}',f'scenario_{j}.yaml'))
+
+        print(f"z scenario {i} sampled.")
