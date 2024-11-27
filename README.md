@@ -11,3 +11,5 @@ pip install -r requirements.txt
 ```
 
 For machine where only SP solving to to be performed, install `linopy=0.3.14` and use `reqs-solve-only.txt` for minimal install.
+
+Due to there being just soooo many scenario files, they are git ignored. `scp` is needed to transfer them to/from the HPC. See https://cambiotraining.github.io/hpc-intro/materials/07-files.html.
