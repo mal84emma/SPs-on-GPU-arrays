@@ -19,7 +19,7 @@ model_settings:
   T: 8760
   initial_SoC: 0.75 # must be > 1 - min(DoD)
   grid_capacity: 500.0e+3 # kW
-  capex_budget: 5.0e+8 # €/yr (10e9/20)
+  capex_budget: 2.0e+8 # €/yr (4e9/20)
   solar_capacity_limit: 500.0e+3 # kWp
   N_technologies: 1
   allow_elec_purchase: True
