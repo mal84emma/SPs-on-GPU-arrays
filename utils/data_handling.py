@@ -24,6 +24,7 @@ class ScenarioData:
     """Class for handling scenario data."""
     def __init__(self, cost_dict, ts_dict, storage_dict):
 
+        self.id = None
         self.probability = None
 
         self.wind_capex = cost_dict['wind_capex'] # €/kWp

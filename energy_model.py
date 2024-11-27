@@ -318,15 +318,18 @@ class EnergyModel():
         }
 
         scenario_objective_contributions_dict = {'units': 'Euros'}
-        scenario_objective_contributions_dict.update({
-            f'scenario_{m}': {
-                'wind_cost': float(self.scen_obj_contrs[m]['wind'].solution.values),
-                'solar_cost': float(self.scen_obj_contrs[m]['solar'].solution.values),
-                'storage_cost': float(self.scen_obj_contrs[m]['storage'].solution.values),
-                'elec_cost': float(self.scen_obj_contrs[m]['elec'].solution.values),
-                'carbon_cost': float(self.scen_obj_contrs[m]['carbon'].solution.values)
-            } for m in range(self.M)
-        })
+        for m in range(self.M):
+            id = self.scenarios[m].id or m
+            scenario_objective_contributions_dict.update({
+                    f'scenario_{id}': {
+                        'probability': float(self.scenario_weightings[m]),
+                        'wind_cost': float(self.scen_obj_contrs[m]['wind'].solution.values),
+                        'solar_cost': float(self.scen_obj_contrs[m]['solar'].solution.values),
+                        'storage_cost': float(self.scen_obj_contrs[m]['storage'].solution.values),
+                        'elec_cost': float(self.scen_obj_contrs[m]['elec'].solution.values),
+                        'carbon_cost': float(self.scen_obj_contrs[m]['carbon'].solution.values)
+                    }
+                })
 
 
         if os.path.dirname(fpath) != '':
