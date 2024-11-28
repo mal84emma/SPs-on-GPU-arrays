@@ -53,14 +53,18 @@ probability_settings: # tuples are [mu,sigma]
       cost: [200,50]
       lifetime: [20,5]
       efficiency: [0.92,0.035]
-    Pb-acid:
-      cost: [150,50]
-      lifetime: [12.5,3.75]
-      efficiency: [0.725,0.0375]
+    NaS:
+      cost: [175,37.5]
+      lifetime: [25,5]
+      efficiency: [0.8,0.05]
     VRBF:
       cost: [250,75]
       lifetime: [20,5]
       efficiency: [0.75,0.05]
+    # Pb-acid:
+    #   cost: [150,50]
+    #   lifetime: [12.5,3.75]
+    #   efficiency: [0.725,0.0375]
     # PCM:
     #   cost: [40,15]
     #   lifetime: [30,5]

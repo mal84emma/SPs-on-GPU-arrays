@@ -17,11 +17,14 @@ storage_values:
   Li-ion:
     discharge_ratio: 2 # kWp/kWh
     depth_of_discharge: 0.9
-  Pb-acid:
-    discharge_ratio: 5 # kWp/kWh
-    depth_of_discharge: 0.5
+  NaS:
+    discharge_ratio: 1 # kWp/kWh
+    depth_of_discharge: 1.0
   VRBF:
     discharge_ratio: 0.5 # kWp/kWh
     depth_of_discharge: 1.0
+  # Pb-acid:
+  #   discharge_ratio: 5 # kWp/kWh
+  #   depth_of_discharge: 0.5
   # PCM:
   #   discharge_ratio: 0.05 # kWp/kWh
