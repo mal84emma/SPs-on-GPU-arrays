@@ -28,9 +28,11 @@ model_settings:
 
 # Default solver settings
 solver_settings:
+  solver: highs # gurobi, highs
   verbose: True
   threads: 4 # no. Gurobi threads
   TimeLimit: 10260 # (s), 3hrs with 5% buffer
+  time_limit: 10260 # format for highs
 
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]

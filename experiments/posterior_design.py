@@ -26,7 +26,8 @@ def posterior_design(measured_scenario_id:int, settings:dict) -> None:
     save_dir = os.path.join(*settings['results_dir'],'posterior',f'z_scenario_{measured_scenario_id}')
 
     # Set up Gurobi environment
-    settings['solver_settings']['env'] = get_Gurobi_WLS_env(silence = not settings['solver_settings']['verbose'])
+    if settings['solver_settings']['solver'] == 'gurobi':
+        settings['solver_settings']['env'] = get_Gurobi_WLS_env(silence = not settings['solver_settings']['verbose'])
 
     # Load posterior samples
     posterior_scenarios_dir = os.path.join(*settings['scenarios_dir'],'varthetas')

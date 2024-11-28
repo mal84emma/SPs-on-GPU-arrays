@@ -45,6 +45,8 @@ def reduce_scenarios(
     # evaluate optimized cost for each scenario
     if (env := settings['solver_settings'].get('env', None)): # temporarily suppress Gurobi output
         env.setParam('OutputFlag',0)
+    else:
+        settings['solver_settings']['log_to_console'] = False
 
     indiv_op_costs = []
     for m,scenario in enumerate(scenarios):
@@ -74,8 +76,11 @@ def reduce_scenarios(
     print(f"Reduced scenarios: {reduced_indices}")
     print(f"With probabilities: {reduced_probs}")
 
+    # reset logging setting
     if (env := settings['solver_settings'].get('env', None)): # return verbose setting
         env.setParam('OutputFlag',int(settings['solver_settings']['verbose']))
+    else:
+        settings['solver_settings']['log_to_console'] = settings['solver_settings']['verbose']
 
     return reduced_scenarios
 
@@ -111,11 +116,17 @@ def solve_model(
     else: solver_kwargs = {'solver_name': 'highs'}
     solver_kwargs['io_api'] = 'direct' # default is 'lp', but 'direct' is faster and doesn't print to console
 
-    gurobi_options = ['TimeLimit','Crossover','CrossoverBasis','OptimalityTol']
-    # see https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html for Gurobi parameters
-    for key in gurobi_options:
+    if settings['solver_settings']['solver'] == 'gurobi':
+        solver_options = ['TimeLimit','Crossover','CrossoverBasis','OptimalityTol']
+        # see https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html for Gurobi parameters
+    else:
+        solver_options = ['time_limit','log_to_console']
+        # see https://ergo-code.github.io/HiGHS/dev/options/definitions for HiGHS options
+
+    for key in solver_options:
         if key in settings['solver_settings']:
             solver_kwargs[key] = settings['solver_settings'][key]
+
 
     # Peform scenario reduction if required
     # =====================================

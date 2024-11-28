@@ -39,7 +39,8 @@ if __name__ == "__main__":
     prior_scenarios = [ScenarioData.from_file(os.path.join(prior_scenarios_dir,f'scenario_{i}.yaml')) for i in range(prob_settings['n_prior_samples'])]
 
     # Set up Gurobi environment
-    settings['solver_settings']['env'] = get_Gurobi_WLS_env(silence = not settings['solver_settings']['verbose'])
+    if settings['solver_settings']['solver'] == 'gurobi':
+        settings['solver_settings']['env'] = get_Gurobi_WLS_env(silence = not settings['solver_settings']['verbose'])
 
     # Perform design
     save_dir = os.path.join(*settings['results_dir'],'prior')
