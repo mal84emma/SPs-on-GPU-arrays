@@ -1,14 +1,16 @@
 # Model settings for test experiments
 
 results_dir: [results, test]
+scenarios_dir: [scenarios, test]
 
 solver_settings:
   verbose: True
   threads: 4 # no. Gurobi threads
 
 model_settings:
-  N_technologies: 2
+  N_technologies: 1
 
 probability_settings:
   n_prior_samples: 50
-  n_posterior_samples: 1
+  n_posterior_samples: 50
+  n_reduced_scenarios: 5

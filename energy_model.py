@@ -56,8 +56,11 @@ class EnergyModel():
         assert 'storage_technologies' in settings.keys(), "`storage_technologies` must be specified in settings (list of technologies used in specified system)."
         self.techs = settings['storage_technologies'] # storage technologies
         assert len(self.techs) > 0, "At least one storage technology must be used."
-        assert len(self.techs) == settings['N_technologies'], "Number of used storage technologies must match `N_technologies`."
-        assert all([tech in scenario.storage_technologies for tech in self.techs for scenario in scenarios]), "Storage technologies must be available in all scenarios."
+        if self.techs == ['none']:
+            self.techs = []
+        else:
+            assert len(self.techs) == settings['N_technologies'], "Number of used storage technologies must match `N_technologies`."
+            assert all([tech in scenario.storage_technologies for tech in self.techs for scenario in scenarios]), "Storage technologies must be available in all scenarios."
 
         assert type(settings['allow_elec_purchase']) == bool, "allow_elec_purchase must be a boolean."
         self.allow_elec_purchase = settings['allow_elec_purchase'] # allow electricity purchase from grid
@@ -149,7 +152,8 @@ class EnergyModel():
             generation_curtailment = self.model.add_variables(lower=0, name=f'generation_curtailment_s{m}', coords=[pd.RangeIndex(self.T,name='time')])
             self.model.add_constraints(generation_curtailment, '<=', wind + solar, name=f'generation_curtailment_s{m}')
 
-            supplied_energy = battery_energy - (wind + solar - generation_curtailment) # still consumption +ve
+            supplied_energy = -1*(wind + solar - generation_curtailment) + battery_energy
+            # still consumption +ve, weird eqn order due to xarray madness
             grid_energy = supplied_energy + load
             self.grid_energies[m] = grid_energy
 
@@ -307,12 +311,13 @@ class EnergyModel():
             }
         }
 
+        overall_storage_cost = float(self.scenario_weightings @ [self.scen_obj_contrs[m]['storage'].solution.values for m in range(self.M)]) if self.techs else 0.0
         overall_objective_dict = {
             'units': 'Euros',
             'overall_objective': float(self.corrected_objective),
             'overall_wind_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['wind'].solution.values for m in range(self.M)]),
             'overall_solar_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['solar'].solution.values for m in range(self.M)]),
-            'overall_storage_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['storage'].solution.values for m in range(self.M)]),
+            'overall_storage_cost': overall_storage_cost,
             'overall_elec_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['elec'].solution.values for m in range(self.M)]) + float(self.load_elec_cost),
             'overall_carbon_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['carbon'].solution.values for m in range(self.M)])
         }
@@ -322,10 +327,11 @@ class EnergyModel():
         scenario_objective_contributions_dict = {'units': 'Euros'}
         for m in range(self.M):
             id = self.scenarios[m].id or m
+            scen_storage_cost = float(self.scen_obj_contrs[m]['storage'].solution.values) if self.techs else 0.0
             scen_cost_dict = {
                     'wind_cost': float(self.scen_obj_contrs[m]['wind'].solution.values),
                     'solar_cost': float(self.scen_obj_contrs[m]['solar'].solution.values),
-                    'storage_cost': float(self.scen_obj_contrs[m]['storage'].solution.values),
+                    'storage_cost': scen_storage_cost,
                     'elec_cost': float(self.scen_obj_contrs[m]['elec'].solution.values) + float(self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T]),
                     'carbon_cost': float(self.scen_obj_contrs[m]['carbon'].solution.values)
                 }

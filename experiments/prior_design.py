@@ -26,7 +26,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 2:
         tech_combo_ind = int(sys.argv[2])
         available_technologies = list(settings['probability_settings']['storage'].keys())
-        combos = list(itertools.combinations(available_technologies, settings['model_settings']['N_technologies']))
+        combos = [['none']] + list(itertools.combinations(available_technologies, settings['model_settings']['N_technologies']))
         tech_combo = combos[tech_combo_ind]
         tech_combo_str = '-'.join(tech_combo)
     else:
