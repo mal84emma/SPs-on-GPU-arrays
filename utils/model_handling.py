@@ -42,6 +42,9 @@ def reduce_scenarios(
             f"Scenario weightings must sum to 1. Currently sum to {np.sum(probs)}"
     else: # assume scenarios equally probable
         probs = np.ones(M)/M
+    # reset scenario object probabilities for individual evals
+    for scenario in scenarios:
+        scenario.probability = None
 
     # evaluate optimized cost for each scenario
     if (env := settings['solver_settings'].get('env', None)): # temporarily suppress Gurobi output
