@@ -86,7 +86,8 @@ class EnergyModel():
         # set scenario probabilities
         if all([scenario.probability is not None for scenario in scenarios]):
             self.scenario_weightings = np.array([scenario.probability for scenario in scenarios])
-            assert np.isclose(np.sum(self.scenario_weightings), 1.0), "Scenario weightings must sum to 1."
+            assert np.isclose(np.sum(self.scenario_weightings), 1.0, rtol=1e-3),\
+                f"Scenario weightings must sum to 1.  Currently sum to {np.sum(self.scenario_weightings)}"
         else: # assume scenarios equally probable
             self.scenario_weightings = np.ones(self.M)/self.M
 

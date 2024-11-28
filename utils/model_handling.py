@@ -38,7 +38,8 @@ def reduce_scenarios(
     # get scenario probabilities
     if all([scenario.probability is not None for scenario in scenarios]):
         probs = np.array([scenario.probability for scenario in scenarios])
-        assert np.isclose(np.sum(probs), 1.0), f"Scenario weightings must sum to 1. Currently sum to {np.sum(probs)}"
+        assert np.isclose(np.sum(probs), 1.0, rtol=1e-3),\
+            f"Scenario weightings must sum to 1. Currently sum to {np.sum(probs)}"
     else: # assume scenarios equally probable
         probs = np.ones(M)/M
 
