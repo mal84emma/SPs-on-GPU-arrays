@@ -316,6 +316,8 @@ class EnergyModel():
             'overall_elec_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['elec'].solution.values for m in range(self.M)]) + float(self.load_elec_cost),
             'overall_carbon_cost': float(self.scenario_weightings @ [self.scen_obj_contrs[m]['carbon'].solution.values for m in range(self.M)])
         }
+        if self.use_CVaR:
+            overall_objective_dict['overall_CVaR_contr'] = float(self.CVaR_obj_contribution.solution.values)
 
         scenario_objective_contributions_dict = {'units': 'Euros'}
         for m in range(self.M):
