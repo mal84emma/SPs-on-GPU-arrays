@@ -28,7 +28,7 @@ model_settings:
 
 # Default solver settings
 solver_settings:
-  solver: highs # gurobi, highs
+  solver: gurobi # gurobi, highs
   verbose: True
   threads: 4 # no. Gurobi threads
   TimeLimit: 10260 # (s), 3hrs with 5% buffer
