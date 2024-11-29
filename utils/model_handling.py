@@ -121,7 +121,7 @@ def solve_model(
     solver_kwargs['io_api'] = 'direct' # default is 'lp', but 'direct' is faster and doesn't print to console
 
     if settings['solver_settings']['solver'] == 'gurobi':
-        solver_options = ['TimeLimit','Crossover','CrossoverBasis','OptimalityTol']
+        solver_options = ['TimeLimit','Crossover','CrossoverBasis','OptimalityTol','barHomogeneous','Method']
         # see https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html for Gurobi parameters
     else:
         solver_options = ['time_limit','log_to_console']
