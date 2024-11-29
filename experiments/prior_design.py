@@ -13,14 +13,9 @@ from configs import get_experiment_config
 if __name__ == "__main__":
 
     # Get experiment settings
-    expt_id = int(sys.argv[1])
-    settings, base_params = get_experiment_config(expt_id)
+    expt_name = str(sys.argv[1])
+    settings, base_params = get_experiment_config(expt_name)
     prob_settings = settings['probability_settings']
-
-    # Update solver settings for prior (use more resources)
-    with open(os.path.join('configs','prior_override_settings.yaml'), 'r') as f:
-        prior_settings = yaml.safe_load(f)
-    settings = update_nested_dict(settings, prior_settings)
 
     # Setup specified tech combo if CLarg passed
     if len(sys.argv) > 2:

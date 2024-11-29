@@ -49,8 +49,8 @@ def posterior_design(measured_scenario_id:int, settings:dict) -> None:
 
 if __name__ == "__main__":
 
-    expt_id = int(sys.argv[1])
-    settings, base_params = get_experiment_config(expt_id)
+    expt_name = str(sys.argv[1])
+    settings, base_params = get_experiment_config(expt_name)
     prob_settings = settings['probability_settings']
 
     if len(sys.argv) > 2: scenario_id = int(sys.argv[2])
