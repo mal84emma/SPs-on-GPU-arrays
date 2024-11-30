@@ -10,12 +10,13 @@ model_settings:
   CVaR_beta: 1
 
 solver_settings:
+  threads: 3
   barHomogeneous: 1
   # see https://support.gurobi.com/hc/en-us/community/posts/360077323472-Theoretical-Background-on-BarHomogeneous-parameter
-  Method: 2
-  # see https://docs.gurobi.com/projects/optimizer/en/current/reference/parameters.html#parametermethod
 
-probability_settings: # tuples are [mu,sigma]
-  n_prior_samples: 200
-  n_posterior_samples: 200
-  n_reduced_scenarios: 20
+probability_settings:
+  n_reduced_scenarios: 10
+  # *relative loss* CVaR objective is suuuper expensive to solve
+  # tried lots of different solver tricks in initial experiments, but none worked,
+  # use fewer reduced scenarios to make solving feasible
+  # Note: the regular CVaR formulation solves really easily
