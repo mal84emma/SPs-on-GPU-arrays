@@ -32,7 +32,7 @@ def posterior_design(measured_scenario_id:int, settings:dict) -> None:
     # Load posterior samples
     posterior_scenarios_dir = os.path.join(*settings['scenarios_dir'],'varthetas')
     posterior_scenario_fpattern = os.path.join(posterior_scenarios_dir,f'z_scenario_{measured_scenario_id}','scenario_{j}.yaml')
-    posterior_scenarios = [ScenarioData.from_file(posterior_scenario_fpattern.format(j=j)) for j in range(prob_settings['n_posterior_samples'])]
+    posterior_scenarios = [ScenarioData.from_file(posterior_scenario_fpattern.format(j=j)) for j in range(settings['probability_settings']['n_posterior_samples'])]
 
     print(f"Starting posterior design for scenario {measured_scenario_id} @ {get_current_time()}")
     # Perform design (trying all tech combos) & save unrestricted design
