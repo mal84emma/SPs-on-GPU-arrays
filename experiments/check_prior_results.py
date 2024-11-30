@@ -12,8 +12,8 @@ from configs import get_experiment_config
 
 if __name__ == "__main__":
 
-    expt_id = int(sys.argv[1])
-    settings, base_params = get_experiment_config(expt_id)
+    expt_name = str(sys.argv[1])
+    settings, base_params = get_experiment_config(expt_name)
 
     available_technologies = list(settings['probability_settings']['storage'].keys())
     tech_combos = ['-'.join(techs) for techs in itertools.combinations(available_technologies, settings['model_settings']['N_technologies'])]
