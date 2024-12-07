@@ -193,8 +193,7 @@ class EnergyModel():
             etas = self.model.add_variables(lower=0, name='CVaR_slack', coords=[pd.RangeIndex(self.M,name='scenarios')])
 
             for m in range(self.M): # add eta constraints per scenario (due to xarray datatype headaches)
-                self.model.add_constraints(etas[m] + xi[0], '>=', self.scenario_objectives[m] - self.scenario_weightings @ self.scenario_objectives, name=f'CVaR_threshold_s{m}')
-                # see notes on relative loss CVaR formulation
+                self.model.add_constraints(etas[m] + xi[0], '>=', self.scenario_objectives[m], name=f'CVaR_threshold_s{m}')
 
             self.CVaR_obj_contribution = self.beta*(xi + 1/self.alpha*(self.scenario_weightings*etas).sum())
             objective += self.CVaR_obj_contribution
