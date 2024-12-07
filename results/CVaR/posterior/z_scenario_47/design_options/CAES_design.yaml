@@ -1,0 +1,229 @@
+solve_stats:
+  termination_condition: optimal
+  run_time:
+    unit: s
+    value: 342.4714608192444
+design:
+  wind_capacity:
+    unit: kW
+    value: 456689.18301882426
+  solar_capacity:
+    unit: kWp
+    value: 500000.0
+  storage_technologies:
+  - CAES
+  storage_capacities:
+    CAES:
+      unit: kWh
+      value: 4560181.001295368
+overall_objective:
+  units: Euros
+  overall_objective: -26977573.452815652
+  overall_wind_cost: 159841214.0565886
+  overall_solar_cost: 30000000.000000007
+  overall_storage_cost: 8612576.077911852
+  overall_elec_cost: -169374863.93321848
+  overall_carbon_cost: 74670371.73263143
+  overall_CVaR_contr: -130726871.38672692
+scenario_objective_contributions:
+  units: Euros
+  scenario_11:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 7232628.725782202
+    elec_cost: -169358687.98949933
+    carbon_cost: 74691804.4941126
+    total_cost: 102406959.28698398
+    probability: 0.028
+  scenario_23:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 6326610.277502969
+    elec_cost: -169621231.02212882
+    carbon_cost: 74571754.74001567
+    total_cost: 101118348.05197833
+    probability: 0.004
+  scenario_24:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8774391.775571268
+    elec_cost: -169316349.58613372
+    carbon_cost: 74705975.65469725
+    total_cost: 104005231.9007233
+    probability: 0.08400000000000002
+  scenario_33:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 7257265.11398148
+    elec_cost: -170997092.1268525
+    carbon_cost: 74210618.43190166
+    total_cost: 100312005.47561914
+    probability: 0.016
+  scenario_38:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 9381312.262933582
+    elec_cost: -170210107.8846817
+    carbon_cost: 74439615.32502705
+    total_cost: 103452033.75986743
+    probability: 0.05200000000000002
+  scenario_43:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 9913323.664375665
+    elec_cost: -169789433.52022457
+    carbon_cost: 74530779.05902374
+    total_cost: 104495883.25976333
+    probability: 0.02
+  scenario_46:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 9511840.752140252
+    elec_cost: -170020479.64072776
+    carbon_cost: 74497105.2919807
+    total_cost: 103829680.4599817
+    probability: 0.04000000000000001
+  scenario_52:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 7288267.842431188
+    elec_cost: -168477591.9183612
+    carbon_cost: 74813203.96757399
+    total_cost: 103465093.94823249
+    probability: 0.036000000000000004
+  scenario_54:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8670079.10551344
+    elec_cost: -168487846.49469197
+    carbon_cost: 74809633.46429536
+    total_cost: 104833080.13170534
+    probability: 0.048000000000000015
+  scenario_87:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 9952719.962768178
+    elec_cost: -169181739.6512643
+    carbon_cost: 74752337.43113066
+    total_cost: 105364531.79922302
+    probability: 0.04000000000000001
+  scenario_88:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8223517.0089112
+    elec_cost: -170619907.06283176
+    carbon_cost: 74280580.23004258
+    total_cost: 101725404.23271051
+    probability: 0.048000000000000015
+  scenario_89:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 10158785.943411505
+    elec_cost: -168418790.70668602
+    carbon_cost: 74829251.40472695
+    total_cost: 106410460.69804093
+    probability: 0.012
+  scenario_97:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8135766.230494319
+    elec_cost: -167824181.693388
+    carbon_cost: 75179488.04326163
+    total_cost: 105332286.63695647
+    probability: 0.048000000000000015
+  scenario_107:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 9271139.137486199
+    elec_cost: -169545956.27198505
+    carbon_cost: 74633419.99509102
+    total_cost: 104199816.91718066
+    probability: 0.05200000000000002
+  scenario_113:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8667367.107133899
+    elec_cost: -168199733.3124615
+    carbon_cost: 75066806.23896807
+    total_cost: 105375654.09022897
+    probability: 0.05200000000000002
+  scenario_128:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8571034.030875558
+    elec_cost: -169095333.12837982
+    carbon_cost: 74830771.69787997
+    total_cost: 104147686.65696421
+    probability: 0.048000000000000015
+  scenario_137:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 7894286.094516087
+    elec_cost: -168994948.57227302
+    carbon_cost: 74832192.14800724
+    total_cost: 103572743.72683883
+    probability: 0.036000000000000004
+  scenario_159:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8603544.428042557
+    elec_cost: -171019569.85179985
+    carbon_cost: 74200120.13317353
+    total_cost: 101625308.76600474
+    probability: 0.048000000000000015
+  scenario_184:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8423212.649636142
+    elec_cost: -169501713.52839124
+    carbon_cost: 74648240.59519753
+    total_cost: 103410953.77303094
+    probability: 0.032
+  scenario_192:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 9593925.464834835
+    elec_cost: -169566592.81656396
+    carbon_cost: 74626517.04196532
+    total_cost: 104495063.7468247
+    probability: 0.028
+  scenario_195:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8455964.37560681
+    elec_cost: -170062328.3332832
+    carbon_cost: 74486419.11713284
+    total_cost: 102721269.21604496
+    probability: 0.07200000000000001
+  scenario_196:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 7717608.829762157
+    elec_cost: -169554716.13006425
+    carbon_cost: 74630489.8027644
+    total_cost: 102634596.55905081
+    probability: 0.04400000000000001
+  scenario_205:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8046060.026633137
+    elec_cost: -169258311.42387474
+    carbon_cost: 74728217.30957672
+    total_cost: 103357179.96892363
+    probability: 0.04400000000000001
+  scenario_215:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 9244707.284648417
+    elec_cost: -168518056.21790373
+    carbon_cost: 74809827.36589739
+    total_cost: 105377692.48923057
+    probability: 0.036000000000000004
+  scenario_247:
+    wind_cost: 159841214.0565885
+    solar_cost: 30000000.0
+    storage_cost: 8325995.025632091
+    elec_cost: -168722328.3268181
+    carbon_cost: 74759945.86470531
+    total_cost: 104204826.62010778
+    probability: 0.032
