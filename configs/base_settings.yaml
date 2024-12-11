@@ -31,7 +31,7 @@ solver_settings:
   solver: gurobi # gurobi, highs
   Method: 2 # only use barrier method, as always solves
   verbose: True
-  threads: 2 # no. Gurobi threads
+  threads: 4 # no. Gurobi threads
   TimeLimit: 10260 # (s), 3hrs with 5% buffer
   time_limit: 10260 # format for highs
 
