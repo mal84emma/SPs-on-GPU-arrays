@@ -2,6 +2,7 @@
 
 import os
 import sys
+import itertools
 import subprocess
 from configs import get_experiment_config
 
@@ -22,7 +23,9 @@ if __name__ == "__main__":
 
     # get max job index for array job argument (note 0-X inclusive)
     if expt_type == 'prior':
-        n_jobs = len(settings['probability_settings']['storage'])
+        available_technologies = list(settings['probability_settings']['storage'].keys())
+        n_combos = len(list(itertools.combinations(available_technologies, settings['model_settings']['N_technologies'])))
+        n_jobs = n_combos
     elif expt_type == 'posterior':
         n_jobs = settings['probability_settings']['n_posterior_samples'] - 1
 
