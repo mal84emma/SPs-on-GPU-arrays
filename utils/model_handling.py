@@ -46,12 +46,18 @@ def reduce_scenarios(
     for scenario in scenarios:
         scenario.probability = None
 
-    # evaluate optimized cost for each scenario
-    if (env := settings['solver_settings'].get('env', None)): # temporarily suppress Gurobi output
+    # temporarily disable solver logging
+    if (env := settings['solver_settings'].get('env', None)):
         env.setParam('OutputFlag',0)
     else:
         settings['solver_settings']['log_to_console'] = False
 
+    # temporarily disable CVaR for scenario reduction
+    CVaR_reset = settings['model_settings'].get('use_CVaR', None)
+    settings['model_settings']['use_CVaR'] = False
+
+
+    # evaluate optimized cost for each scenario
     indiv_op_costs = []
     for m,scenario in enumerate(scenarios):
         model = solve_model([scenario], settings)
@@ -85,6 +91,9 @@ def reduce_scenarios(
         env.setParam('OutputFlag',int(settings['solver_settings']['verbose']))
     else:
         settings['solver_settings']['log_to_console'] = settings['solver_settings']['verbose']
+
+    # reset CVaR setting
+    settings['model_settings']['use_CVaR'] = CVaR_reset
 
     return reduced_scenarios
 

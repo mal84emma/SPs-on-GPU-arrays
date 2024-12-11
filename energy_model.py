@@ -71,10 +71,10 @@ class EnergyModel():
         assert type(settings['use_CVaR']) == bool, "use_CVaR must be a boolean."
         self.use_CVaR = settings['use_CVaR'] # use Conditional Value at Risk in objective
         if self.use_CVaR:
-            assert 0 < settings['CVaR_alpha'] < 0.5, "CVaR_alpha must be between 0 and 0.5."
-            assert settings['CVaR_beta'] > 0, "CVaR_beta must be positive."
-            self.alpha = settings['CVaR_alpha'] # confidence level
-            self.beta = settings['CVaR_beta'] # risk aversion parameter
+            assert 0 < settings['CVaR_alpha'] < 0.5, "CVaR_alpha must be between 0 and 0.5, as it is the right tail probability."
+            assert settings['CVaR_n'] > 0, "CVaR_n must be positive."
+            self.alpha = settings['CVaR_alpha'] # right-tail probability parameter
+            self.n_upweight = settings['CVaR_n'] # right-tail upweighting parameter
 
         if set_design is not None:
             assert all([key in set_design for key in ['wind_capacity','solar_capacity']]), "Design dict must contain keys 'wind_capacity' and 'solar_capacity'."
@@ -195,8 +195,9 @@ class EnergyModel():
             for m in range(self.M): # add eta constraints per scenario (due to xarray datatype headaches)
                 self.model.add_constraints(etas[m] + xi[0], '>=', self.scenario_objectives[m], name=f'CVaR_threshold_s{m}')
 
-            self.CVaR_obj_contribution = self.beta*(xi + 1/self.alpha*(self.scenario_weightings*etas).sum())
-            objective += self.CVaR_obj_contribution
+            self.CVaR_obj_contribution = xi + 1/self.alpha*(self.scenario_weightings*etas).sum()
+            objective += self.n_upweight*self.alpha * self.CVaR_obj_contribution
+            objective *= 1/(1+self.n_upweight*self.alpha)
         # endif
 
         self.model.add_objective(objective, sense='min')
@@ -323,6 +324,7 @@ class EnergyModel():
         }
         if self.use_CVaR:
             overall_objective_dict['overall_CVaR_contr'] = float(self.CVaR_obj_contribution.solution.values)
+            overall_objective_dict['note'] = "Objective contributions do not sum to overall objective due to scaling used with CVaR formulation."
 
         scenario_objective_contributions_dict = {'units': 'Euros'}
         for m in range(self.M):
