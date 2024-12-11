@@ -193,7 +193,8 @@ class EnergyModel():
             etas = self.model.add_variables(lower=0, name='CVaR_slack', coords=[pd.RangeIndex(self.M,name='scenarios')])
 
             for m in range(self.M): # add eta constraints per scenario (due to xarray datatype headaches)
-                self.model.add_constraints(etas[m] + xi[0], '>=', self.scenario_objectives[m], name=f'CVaR_threshold_s{m}')
+                corrected_scenario_objective = self.scenario_objectives[m] + self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T]
+                self.model.add_constraints(etas[m] + xi[0], '>=', corrected_scenario_objective, name=f'CVaR_threshold_s{m}')
 
             self.CVaR_obj_contribution = xi + 1/self.alpha*(self.scenario_weightings*etas).sum()
             objective += self.n_upweight*self.alpha * self.CVaR_obj_contribution
@@ -213,9 +214,14 @@ class EnergyModel():
         # ToDo arg parsing for solvers
         self.model.solve(**kwargs)
 
-        self.load_elec_cost = self.scenario_weightings @ [self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T] for m in range(self.M)]
-        self.corrected_objective = self.model.objective.value + self.load_elec_cost
+        # Correct objective value to account for constant term (cost of electricity for load)
+        if self.use_CVaR: constant_correction_factor = 1/(1+self.n_upweight*self.alpha)
+        else: constant_correction_factor = 1
 
+        self.load_elec_cost = self.scenario_weightings @ [self.scenarios[m].load[:self.T] @ self.scenarios[m].elec_prices[:self.T] for m in range(self.M)]
+        self.corrected_objective = self.model.objective.value + constant_correction_factor * self.load_elec_cost
+
+        # Log solve time
         self.run_time = time.time() - start_time
 
         return self.corrected_objective
