@@ -3,9 +3,32 @@
 import numpy as np
 import pandas as pd
 
+import matplotlib.colors as mc
+import colorsys
+
 import plotly.graph_objects as go
 from plotly.graph_objects import Figure
 from plotly.subplots import make_subplots
+
+
+def lighten_color(color, amount=0.5):
+    """
+    Lightens the given color by multiplying (1-luminosity) by the given amount.
+    Input can be matplotlib color string, hex string, or RGB tuple.
+
+    Credit: https://stackoverflow.com/a/49601444
+
+    Examples:
+    >> lighten_color('g', 0.3)
+    >> lighten_color('#F034A3', 0.6)
+    >> lighten_color((.3,.55,.1), 0.5)
+    """
+    try:
+        c = mc.cnames[color]
+    except:
+        c = color
+    c = colorsys.rgb_to_hls(*mc.to_rgb(c))
+    return colorsys.hls_to_rgb(c[0], 1 - amount * (1 - c[1]), c[2])
 
 
 def init_profile_fig(title=None, y_titles=None) -> Figure:
@@ -37,8 +60,7 @@ def init_profile_fig(title=None, y_titles=None) -> Figure:
             title=y_titles['y2'],
             anchor="x",
             overlaying="y",
-            side="right",
-            griddash="dash"
+            side="right"
         ))
     if 'y3' in y_titles:
         fig.update_layout(yaxis3=dict(
@@ -46,8 +68,7 @@ def init_profile_fig(title=None, y_titles=None) -> Figure:
             anchor="free",
             overlaying="y",
             side="right",
-            position=0.975,
-            griddash="dot"
+            position=0.975
         ))
 
     fig.update_xaxes(
@@ -72,7 +93,7 @@ def init_profile_fig(title=None, y_titles=None) -> Figure:
 def add_profile(fig, profile, yaxis='y', **kwargs) -> Figure:
 
     n_steps = len(profile)
-    timestamps = pd.date_range(start='2000-01-01', periods=n_steps, freq='H')
+    timestamps = pd.date_range(start='2000-01-01', periods=n_steps, freq='h')
 
     fig.add_trace(go.Scatter(
         x=timestamps,
