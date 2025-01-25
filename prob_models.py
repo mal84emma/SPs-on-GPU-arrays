@@ -74,7 +74,7 @@ def prior_model(prob_settings:dict, base_cost_dict:dict, base_ts_dict:dict, base
 
     ## Perform z sampling (storage only)
     for i in range(n_samples):
-        ts_dict, cost_dict, storage_dict = theta_scenarios[i].to_file(None, save=False)
+        cost_dict, ts_dict, storage_dict = theta_scenarios[i].to_file(None, save=False)
 
         for tech in storage_dict.keys():
             for key in ['cost', 'lifetime', 'efficiency']:
@@ -83,7 +83,7 @@ def prior_model(prob_settings:dict, base_cost_dict:dict, base_ts_dict:dict, base
                     scale=prob_settings['storage'][tech][key][1]*prob_settings['measurement_sigma_reduction'] # reduced sigma
                 ))
 
-        z_scenarios.append(ScenarioData(ts_dict, cost_dict, storage_dict))
+        z_scenarios.append(ScenarioData(cost_dict, ts_dict, storage_dict))
 
     return theta_scenarios, z_scenarios
 
@@ -101,7 +101,10 @@ def posterior_model(z_scenario:ScenarioData, prob_settings:dict,
         Iterable[ScenarioData]: List of vartheta scenarios.
     """
 
-    ts_dict, cost_dict, storage_dict = z_scenario.to_file(None, save=False)
+    cost_dict, ts_dict, storage_dict = z_scenario.to_file(None, save=False)
+
+    ## Sample timeseries parameters (unmeasured) using prior
+    thetas,_ = prior_model(prob_settings, cost_dict, ts_dict, storage_dict, n_samples)
 
     ## Perform vartheta sampling (storage only)
     vartheta_samples = {}
@@ -134,10 +137,11 @@ def posterior_model(z_scenario:ScenarioData, prob_settings:dict,
     ## Assign samples to scenarios and create objects
     vartheta_scenarios = []
     for i in range(n_samples):
+        _,ts_dict_i,_ = thetas[i].to_file(None, save=False) # resampled ts params
         for tech in storage_dict.keys():
             for key in ['cost', 'lifetime', 'efficiency']:
                 storage_dict[tech][key] = float(vartheta_samples[tech][key][i])
-        vartheta_scenarios.append(ScenarioData(ts_dict, cost_dict, storage_dict))
+        vartheta_scenarios.append(ScenarioData(cost_dict, ts_dict_i, storage_dict))
 
     return vartheta_scenarios
 
