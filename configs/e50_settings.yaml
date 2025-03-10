@@ -1,0 +1,9 @@
+## Settings for experiment with uncertianty reduction epsilon=50%
+
+adopt: base
+
+scenarios_dir: [scenarios, e50]
+results_dir: [results, e50]
+
+probability_settings:
+  measurement_sigma_reduction: 0.5
