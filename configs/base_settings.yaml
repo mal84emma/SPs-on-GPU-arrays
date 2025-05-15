@@ -8,8 +8,8 @@ scenarios_dir: [scenarios, base]
 # Available years of data
 wind_years: &wind_years [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
 solar_years: &solar_years [2010,2011,2012,2013,2014,2015,2016,2017,2018,2019]
-price_years: [2023]
-carbon_years: [2023]
+price_years: [2023,2024]
+carbon_years: [2023,2024]
 
 # Location of assets
 site_location: [51.95,4.1]
@@ -45,6 +45,8 @@ probability_settings: # tuples are [mu,sigma]
   load_level: [250000,25000]
   wind_years: *wind_years
   solar_years: *solar_years
+  price_year: 2023
+  carbon_year: 2023
   storage:
     CAES:
       cost: [50,15]

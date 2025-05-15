@@ -2,7 +2,9 @@
 
 adopt: base
 
+scenarios_dir: [scenarios, data24]
 results_dir: [results, data24]
 
-price_years: [2024]
-carbon_years: [2024]
+probability_settings:
+  price_year: 2024
+  carbon_year: 2024

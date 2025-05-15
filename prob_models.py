@@ -64,6 +64,8 @@ def prior_model(prob_settings:dict, base_cost_dict:dict, base_ts_dict:dict, base
         ts_dict['load_level'] = float(truncnorm_sample(*prob_settings['load_level']))
         ts_dict['wind_year'] = int(np.random.choice(prob_settings['wind_years']))
         ts_dict['solar_year'] = int(np.random.choice(prob_settings['solar_years']))
+        ts_dict['price_year'] = prob_settings['price_year']
+        ts_dict['carbon_year'] = prob_settings['carbon_year']
 
         # Sample storage parameters (all with truncnorm distributions)
         for tech in storage_dict.keys():
