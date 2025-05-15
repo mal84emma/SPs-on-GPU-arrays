@@ -18,10 +18,14 @@ Solar generation is assumed to be on-site, in the [assumed industrial site](http
 
 Day-ahead electricity prices for the Netherlands are taken from [entso-e](https://transparency.entsoe.eu/transmission-domain/r2/dayAheadPrices/show?areaType=BZN). Note realtime pricing is more commercially sensitive and so is expensive to access and not publicly sharable.
 
-2023 prices only are used as they are considered to most reflective of future electricity price trends, e.g. containing periods of negative prices, and not being distorted by: 2022 gas shortages, COVID effects, etc.
+2023 prices are used as they are considered to most reflective of future electricity price trends, e.g. containing periods of negative prices, and not being distorted by: 2022 gas shortages, COVID effects, etc.
 
-From the [Dutch statistics body](https://www.cbs.nl/en-gb/figures/detail/85592ENG), in 2023 the average consumer electricity price was around €330/MWh. So, the day-ahead prices are scale to an average of €300/MWh to reflect commercial prices.
+From the [Dutch statistics body](https://www.cbs.nl/en-gb/figures/detail/85592ENG), in 2023 the average consumer electricity price was around €330/MWh. So, the day-ahead prices are scaled to an average of €300/MWh to reflect commercial prices.
+
+2024 prices, and 2023 prices normalised to €270/MWh and €330/MWh (plus-minus 10%), are used for sensitivity analysis.
 
 ## Grid electricity carbon intensity
 
-2023 grid electricity carbon intensity data for the Netherlands is taken from [electricitymaps.com](https://www.electricitymaps.com/data-portal/netherlands).
+2023 grid electricity carbon intensity data for the Netherlands is taken from [electricitymaps.com](https://portal.electricitymaps.com/datasets/NL).
+
+2024 data is used for sensitivity analysis.
