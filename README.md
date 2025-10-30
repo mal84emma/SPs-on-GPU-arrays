@@ -9,6 +9,9 @@ A suitable environment for running this code can be initialised using [conda](ht
 ```
 conda create --name epgpu python=3.11
 conda activate epgpu
-conda install -c conda-forge linopy=0.3.14
+cd <cupdlpx dir>
+pip install -e .
+cd <linopy-gpu dir>
+pip install -e .
 pip install -r requirements.txt
 ```
