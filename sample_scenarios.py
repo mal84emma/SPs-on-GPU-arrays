@@ -6,7 +6,7 @@ import time
 import numpy as np
 
 from configs import get_experiment_config
-from prob_models import prior_model, posterior_model
+from model.prob_models import prior_model, posterior_model
 
 
 if __name__ == "__main__":
