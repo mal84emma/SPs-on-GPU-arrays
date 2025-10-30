@@ -2,13 +2,13 @@
 
 import copy
 import numpy as np
-from scipy.stats import norm, truncnorm
+from scipy.stats import truncnorm
 from typing import List
 
-from utils.data_handling import ScenarioData
+from .utils import ScenarioData
 
 
-def truncnorm_sample(mu:float, sigma:float, lower=-2.0, upper=2.0) -> np.array:
+def truncnorm_sample(mu: float, sigma: float, lower=-2.0, upper=2.0) -> np.array:
     """Sample from a truncated normal distribution.
     Default truncation is \pm 2 standard deviations.
 
@@ -24,8 +24,13 @@ def truncnorm_sample(mu:float, sigma:float, lower=-2.0, upper=2.0) -> np.array:
     return truncnorm.rvs(lower, upper, loc=mu, scale=sigma)
 
 
-def prior_model(prob_settings:dict, base_cost_dict:dict, base_ts_dict:dict, base_storage_dict:dict,
-                n_samples:int=64) -> List[ScenarioData]:
+def prior_model(
+    prob_settings: dict,
+    base_cost_dict: dict,
+    base_ts_dict: dict,
+    base_storage_dict: dict,
+    n_samples: int = 64,
+) -> List[ScenarioData]:
     """Sample scenarios from prior distribution. Output as lists of ScenarioData objects
 
     Args:
@@ -40,7 +45,9 @@ def prior_model(prob_settings:dict, base_cost_dict:dict, base_ts_dict:dict, base
         List[ScenarioData]: Lists of sampled scenarios.
     """
 
-    assert all([key in prob_settings['storage'].keys() for key in base_storage_dict.keys()]), "Must provide probability settings for all storage technologies."
+    assert all(
+        [key in prob_settings["storage"].keys() for key in base_storage_dict.keys()]
+    ), "Must provide probability settings for all storage technologies."
 
     scenarios = []
 
@@ -49,16 +56,18 @@ def prior_model(prob_settings:dict, base_cost_dict:dict, base_ts_dict:dict, base
         storage_dict = copy.deepcopy(base_storage_dict)
 
         # Sample timeseries parameters
-        ts_dict['load_level'] = float(truncnorm_sample(*prob_settings['load_level']))
-        ts_dict['wind_year'] = int(np.random.choice(prob_settings['wind_years']))
-        ts_dict['solar_year'] = int(np.random.choice(prob_settings['solar_years']))
-        ts_dict['price_year'] = prob_settings['price_year']
-        ts_dict['carbon_year'] = prob_settings['carbon_year']
+        ts_dict["load_level"] = float(truncnorm_sample(*prob_settings["load_level"]))
+        ts_dict["wind_year"] = int(np.random.choice(prob_settings["wind_years"]))
+        ts_dict["solar_year"] = int(np.random.choice(prob_settings["solar_years"]))
+        ts_dict["price_year"] = prob_settings["price_year"]
+        ts_dict["carbon_year"] = prob_settings["carbon_year"]
 
         # Sample storage parameters (all with truncnorm distributions)
         for tech in storage_dict.keys():
-            for key in ['cost', 'lifetime', 'efficiency']:
-                storage_dict[tech][key] = float(truncnorm_sample(*prob_settings['storage'][tech][key]))
+            for key in ["cost", "lifetime", "efficiency"]:
+                storage_dict[tech][key] = float(
+                    truncnorm_sample(*prob_settings["storage"][tech][key])
+                )
 
         scenarios.append(ScenarioData(base_cost_dict, ts_dict, storage_dict))
 
