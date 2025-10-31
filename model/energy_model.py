@@ -50,11 +50,11 @@ class EnergyModel:
             "Settings dict must contain all required keys."
         )
 
-        assert type(settings["T"]) == int, "T must be an integer."
+        assert type(settings["T"]) is int, "T must be an integer."
         assert settings["T"] > 0, "T must be a positive integer."
         self.T = settings["T"]  # number of time steps
 
-        assert type(settings["initial_SoC"]) == float, "initial_SoC must be a float."
+        assert type(settings["initial_SoC"]) is float, "initial_SoC must be a float."
         assert 0 <= settings["initial_SoC"] <= 1, "initial_SoC must be between 0 and 1."
         self.initial_SoC = settings[
             "initial_SoC"
@@ -79,7 +79,7 @@ class EnergyModel:
                 ]
             ), "Storage technologies must be available in all scenarios."
 
-        assert type(settings["allow_elec_purchase"]) == bool, (
+        assert type(settings["allow_elec_purchase"]) is bool, (
             "allow_elec_purchase must be a boolean."
         )
         self.allow_elec_purchase = settings[
@@ -93,7 +93,7 @@ class EnergyModel:
             "capex_budget"
         ]  # maximum capital expenditure (€, annualised)
 
-        assert type(settings["use_CVaR"]) == bool, "use_CVaR must be a boolean."
+        assert type(settings["use_CVaR"]) is bool, "use_CVaR must be a boolean."
         self.use_CVaR = settings[
             "use_CVaR"
         ]  # use Conditional Value at Risk in objective
@@ -228,7 +228,7 @@ class EnergyModel:
 
                 # Dynamics constraints
                 self.model.add_constraints(
-                    self.initial_SoC * storage_capacity[0]
+                    self.initial_SoC * storage_capacity
                     + -1 * SOC[0]
                     + np.sqrt(eta) * Ein[0]
                     - 1 / np.sqrt(eta) * Eout[0],

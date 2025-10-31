@@ -23,23 +23,19 @@ model_settings:
   capex_budget: 2.0e+8 # €/yr (4e9/20)
   solar_capacity_limit: 500.0e+3 # kWp
   N_technologies: 1
+  storage_technologies: [Li-ion]
   allow_elec_purchase: True
   use_CVaR: False
 
 # Default solver settings
 solver_settings:
-  solver: gurobi # gurobi, highs
-  Method: 2 # only use barrier method, as always solves
-  verbose: True
-  threads: 4 # no. Gurobi threads
-  TimeLimit: 10260 # (s), 3hrs with 5% buffer
-  time_limit: 10260 # format for highs
+  solver_name: highs # highs, cupdlpx
 
 # Probabilistic model settings
 probability_settings: # tuples are [mu,sigma]
   n_prior_samples: 250
   n_posterior_samples: 250
-  n_reduced_scenarios: 25
+  n_reduced_scenarios: 100
   sampling_thin_factor: 10
   measurement_sigma_reduction: 0.25
   load_level: [250000,25000]

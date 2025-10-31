@@ -31,6 +31,6 @@ if __name__ == "__main__":
     )
 
     for i in range(prob_settings["n_prior_samples"]):
-        scenarios[i].to_file(os.path.join(save_dir, "thetas", f"scenario_{i}.yaml"))
+        scenarios[i].to_file(os.path.join(save_dir, f"scenario_{i}.yaml"))
 
     print(f"Scenarios sampled in {time.time() - start:.1f}s")
