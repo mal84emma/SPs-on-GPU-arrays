@@ -55,7 +55,7 @@ Lagrange multipliers (or dual variables) tell us our 'willingness to pay' for vi
 So, if we solve sub-problem $n$ constraining $x$ to have value $\tilde{x}$,
 
 $$
-\min_{y_n} c(d_n)^T \begin{bmatrix} x \\ y_n \end{bmatrix} \quad \text{s.t.} \: x = \tilde{x} \:\: \text{(and usual constraints)}
+\min_{y_n} c(d_n)^T \begin{bmatrix} x \\ y_n \end{bmatrix} \quad \text{s.t.} x = \tilde{x} \quad \text{(and usual constraints)}
 $$
 
 the corresponding dual value $\lambda_n$ which satisfies complementary slackness,
