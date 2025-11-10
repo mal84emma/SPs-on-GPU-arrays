@@ -33,6 +33,7 @@ The goal is to reduce solution times for two-stage Stochastic Programs. These ha
 $$
 \min_{x,y_1,\dots,y_N} \frac{1}{N} \sum_n c(d_n)^T \begin{bmatrix} x \\ y_n \end{bmatrix} \quad \text{s.t.  some constraints}
 $$
+
 where $x$ is the vector of first-stage decision variables, $(y_1,\dots,y_N)$ are the second-stage decision variable vectors for each scenario, $d_n$ is the data for scenario $n$ sampled from the uncertainty distribution, and $c(d_n)$ is the cost vector for scenario $n$.
 
 The Stochastic Program from [this paper](https://www.sciencedirect.com/science/article/pii/S0360544225032426) for sizing energy storage and generation capacity for an industrial scale energy park is used as a test case.
@@ -52,22 +53,29 @@ Lagrange multipliers (or dual variables) tell us our 'willingness to pay' for vi
 > This means, if we set the first-stage variables to have some specific value in a sub-problem using an equality constraint, **the dual value corresponding to that constraint tells us the local gradient of the sub-problem objective w.r.t $x$**, accounting for the second-stage constraints.
 
 So, if we solve sub-problem $n$ constraining $x$ to have value $\tilde{x}$,
+
 $$
 \min_{y_n} c(d_n)^T \begin{bmatrix} x \\ y_n \end{bmatrix} \quad \text{s.t.} \: x = \tilde{x} \:\: \text{(\& usual constraints)}
 $$
+
 the corresponding dual value $\lambda_n$ which satisfies complementary slackness,
+
 $$
 \lambda_n \left( x - \tilde{x} \right) = 0
 $$
+
 is an estimate of the local gradient for the sub-problem,
+
 $$
 \lambda_n \approx \left. \frac{d}{dx}\left( \text{constrained sub-objective} \right) \right\rvert_{x=\tilde{x}}
 $$
 
 This means we can get the gradient for the overall stochastic optimisation (the meta-optimisation) by accumulating dual values from solving all of the LP sub-problems (**which can be done independently**),
+
 $$
 g(\tilde{x}) \approx \frac{1}{N} \sum_n \lambda_n
 $$
+
 and we can now use this gradient information for optimisation!
 
 ### Intuition
