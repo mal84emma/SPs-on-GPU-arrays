@@ -82,7 +82,7 @@ and we can now use this gradient information for optimisation!
 
 Linear Program solvers typically have $O(n^{2-3})$ computational complexity.
 
-Re-expressing the Stochastic Program and breaking it into LP sub-problems could overcome this exponential cost if the meta-optimisation problem (first-stage optimisation) is nicely solvable (though it will no longer be a Linear Program). As we now repeatedly solve a set of sub-problems of fixed size, which could be more efficient as the number of scenarios gets large.
+Re-expressing the Stochastic Program and breaking it into LP sub-problems could overcome this quadratic/cubic cost if the meta-optimisation problem (first-stage optimisation) is nicely solvable (though it will no longer be a Linear Program). As we now repeatedly solve a set of sub-problems of fixed size, which could be more efficient as the number of scenarios gets large.
 
 I have some intuition that this meta-optimisation will be *piecewise linear and still convex* (because we're projecting the objective value at the best boundary down to the sub-space of the first-stage variables).
 
